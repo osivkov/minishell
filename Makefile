@@ -16,16 +16,17 @@ LIBFT = $(LIBFT_DIR)/libft.a
 
 # List of project source files
 SRCS = $(SRC_DIR)/main.c \
-		$(SRC_DIR)/parser/lexer.c \
-		$(SRC_DIR)/parser/parser.c \
-		$(SRC_DIR)/parser/quotes.c \
-		$(SRC_DIR)/parser/expand.c \
-		$(SRC_DIR)/executor/execute.c \
-		$(SRC_DIR)/executor/builtins.c \
-		$(SRC_DIR)/executor/pipes.c \
-		$(SRC_DIR)/executor/redirects.c \
-		$(SRC_DIR)/signals/signals.c \
 		$(SRC_DIR)/utils/utils.c \
+		# $(SRC_DIR)/parser/lexer.c \
+		# $(SRC_DIR)/parser/parser.c \
+		# $(SRC_DIR)/parser/quotes.c \
+		# $(SRC_DIR)/parser/expand.c \
+		# $(SRC_DIR)/executor/execute.c \
+		# $(SRC_DIR)/executor/builtins.c \
+		# $(SRC_DIR)/executor/pipes.c \
+		# $(SRC_DIR)/executor/redirects.c \
+		# $(SRC_DIR)/signals/signals.c \
+		
 
 
 # Convert source file paths into object file paths in the OBJ_DIR
@@ -36,7 +37,7 @@ all: $(NAME)
 
 # Rule to link the final executable from object files and the libft library
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(CFLAGS) -I$(INCL_DIR) -I$(LIBFT_DIR) $(OBJS) $(LIBFT) -o $(NAME)
+	$(CC) $(CFLAGS) -I$(INCL_DIR) -I$(LIBFT_DIR) $(OBJS) $(LIBFT) -lreadline -lncurses  -o $(NAME)
 
 # Rule to compile .c files into .o files, preserving directory structure
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c

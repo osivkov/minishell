@@ -1,0 +1,28 @@
+minishell/
+├── includes/
+│   └── minishell.h       # Main header file with structure definitions and function prototypes
+├── src/
+│   ├── main.c            # Entry point of the program
+│   ├── parser/           # Input parsing module
+│   │   ├── lexer.c       # Tokenization of the input string (splitting into tokens)
+│   │   ├── parser.c      # Building a command structure from tokens
+│   │   ├── quotes.c      # Handling single and double quotes
+│   │   └── expand.c      # Handling environment variables and expansions ($, $?)
+│   ├── executor/         # Command execution module
+│   │   ├── execute.c     # Main function for executing commands
+│   │   ├── builtins.c    # Implementation of built-in commands (echo, cd, pwd, export, unset, env, exit)
+│   │   ├── pipes.c       # Implementation of pipes (pipe, dup2, fork)
+│   │   └── redirects.c   # Handling redirections (<, >, <<, >>)
+│   ├── signals/          # Signal handling module
+│   │   └── signals.c     # Signal handlers (ctrl-C, ctrl-D, ctrl-\)
+│   ├── utils/            # Utility functions
+│   │   └── utils.c       # Functions for handling strings, memory, errors, etc.
+│   └── bonus/            # Module for bonus features (only include if the mandatory part is complete)
+│       ├── logical_ops.c   # Implementation of logical operators (&&, ||) with priority handling
+│       └── wildcards.c     # Handling wildcard expansions (*) for file names
+├── libft/                # Allowed Libft library (with source files and Makefile)
+├── Makefile              # Makefile for building the project
+└── README.md             # Project description and usage instructions
+
+
+
