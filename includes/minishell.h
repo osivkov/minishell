@@ -20,6 +20,16 @@
 #include "../libft/libft.h"
 // Include other standard libraries as needed
 
+typedef enum e_token_type {
+	T_WORD,         // Word (command or argument)
+	T_PIPE,         // Symbol |
+	T_REDIR_IN,     // Symbol <
+	T_REDIR_OUT,    // Symbol >
+	T_REDIR_APPEND, // Symbol >>
+	T_HEREDOC       // Symbol <<
+} t_token_type;
+
+
 /* Token structure */
 /* This structure represents a single token extracted from the input.
    It can be a command, argument, or an operator (such as PIPE or REDIRECT). */
@@ -66,6 +76,8 @@ char	**expand_variables(char **args);
 /* Function prototypes for shell management */
 /* These functions initialize, run, and free the main minishell structure */
 t_minishell	*init_minishell(char **env);
+void 		free_cmd(t_cmd *cmd);
+void 		free_tokens(t_token *tokens);
 void		free_minishell(t_minishell *shell);
 int			run_minishell(t_minishell *shell);
 

@@ -18,11 +18,14 @@
 
 int run_minishell(t_minishell *shell)
 {
-	char	*input;
-	(void)shell;
-	// t_token	*tokens;
-	// t_cmd	*cmd;
+	char		*input;
+	t_token		*tokens;
+	t_cmd		*cmd;
+	t_token		*temp;
+	t_cmd		*cmd_temp;
+	int			i;
 
+	(void)shell;
 	while (1)
 	{
 		/* Display prompt and read input */
@@ -35,19 +38,46 @@ int run_minishell(t_minishell *shell)
 		}
 
 		if (input[0] != '\0')
+		{
 			add_history(input); /*add_history part of readline lib, with we can use
 			arrow  tow down for listing history*/
-
+		}
+			tokens = lexer(input);
+			ft_putendl_fd("Tokens:", 1);
+			temp = tokens;
+		while (temp)
+		{
+			ft_putstr_fd(temp->value, 1);
+			ft_putchar_fd(' ', 1);
+			temp = temp->next;
+		}
+		ft_putchar_fd('\n', 1);
+		cmd = parser(tokens);
+		// Debug: print commands (here, just printing arguments)
+		ft_putendl_fd("Commands:", 1);
+		cmd_temp = cmd;
+		while (cmd_temp)
+		{
+			i = 0;
+			while (cmd_temp->args && cmd_temp->args[i])
+			{
+				ft_putstr_fd(cmd_temp->args[i], 1);
+				ft_putchar_fd(' ', 1);
+				i++;
+			}
+			ft_putchar_fd('\n', 1);
+			cmd_temp = cmd_temp->next;
+		}
 		/* Call the parser here:
 		 * tokens = lexer(input);
 		 * cmd = parser(tokens);
 		 *
 		 * For now, simply print the input as a placeholder.
 		 */
-		ft_putendl_fd(input, 1);  // Print the input (placeholder)
-
 		/* Free the memory allocated by readline */
 		free(input);
+		free_tokens(tokens);
+		free_cmd(cmd);
 
 		/* After integrating the parser and executor, here we will:
 		 * - Execute commands (execute(shell->cmd));
