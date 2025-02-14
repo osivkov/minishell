@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/12 16:36:12 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/14 15:42:41 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,10 @@ int run_minishell(t_minishell *shell)
 {
 	char		*input;
 	t_token		*tokens;
-	t_cmd		*cmd;
 	t_token		*temp;
 	t_cmd		*cmd_temp;
 	int			i;
 
-	(void)shell;
 	while (1)
 	{
 		/* Display prompt and read input */
@@ -45,6 +43,13 @@ int run_minishell(t_minishell *shell)
 			tokens = lexer(input);
 			ft_putendl_fd("Tokens:", 1);
 			temp = tokens;
+		
+		t_cmd *cmd = shell->cmd;
+		while (cmd)
+		{
+		cmd->args = expand_variables(cmd->args);
+		cmd = cmd->next;
+		}
 		while (temp)
 		{
 			ft_putstr_fd(temp->value, 1);
@@ -121,6 +126,17 @@ t_minishell *init_minishell(char **env)
 	while (env[i])
 	{
 		shell->env[i] = ft_strdup(env[i]);
+		 if(!shell->env[i])
+		 {
+			while (i > 0)
+			{
+				i--;
+				free(shell->env[i]);
+			}
+			free(shell->env);
+			free(shell);
+			return(NULL);
+		 }
 		i++;
 	}
 	shell->env[i] = NULL;

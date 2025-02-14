@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 16:11:29 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/10 15:07:47 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/14 17:07:27 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ char	*gnl_ft_strjoin(char const *s1, char const *s2)
 	int		j;
 
 	i = 0;
-	sizetotal = ft_strlen(s1) + ft_strlen(s2);
+	sizetotal = gnl_ft_strlen(s1) + gnl_ft_strlen(s2);
 	res = malloc(sizeof(char) * (sizetotal + 1));
 	if (!res || !s1 || !s2)
 		return (NULL);
@@ -40,7 +40,7 @@ char	*gnl_ft_strjoin(char const *s1, char const *s2)
 	return (res);
 }
 
-char	*ft_strchr(const char *string, int searchedChar )
+char	*gnl_ft_strchr(const char *string, int searchedChar )
 {
 	char	*str;
 
@@ -53,7 +53,7 @@ char	*ft_strchr(const char *string, int searchedChar )
 		return (NULL);
 }
 
-void	ft_bzero(void *s, size_t n)
+void	gnl_ft_bzero(void *s, size_t n)
 {
 	char	*str;
 	size_t	i;
@@ -67,18 +67,18 @@ void	ft_bzero(void *s, size_t n)
 	}
 }
 
-void	*ft_calloc(size_t elementCount, size_t elementSize)
+void	*gnl_ft_calloc(size_t elementCount, size_t elementSize)
 {
 	char	*res;
 
 	res = malloc(elementSize * elementCount);
 	if (!res)
 		return (NULL);
-	ft_bzero(res, elementSize * elementCount);
+	gnl_ft_bzero(res, elementSize * elementCount);
 	return (res);
 }
 
-size_t	ft_strlen(const char *theString)
+size_t	gnl_ft_strlen(const char *theString)
 {
 	int	i;
 

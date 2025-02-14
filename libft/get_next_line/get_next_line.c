@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/29 14:05:42 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/10 15:09:40 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/14 17:07:00 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ char	*ft_next(char *buffer)
 		i++;
 	if (!buffer[i])
 		return (free(buffer), NULL);
-	line = ft_calloc((ft_strlen(buffer) - i + 1), sizeof(char));
+	line = gnl_ft_calloc((gnl_ft_strlen(buffer) - i + 1), sizeof(char));
 	if (!line)
 	{
 		return (free(buffer), NULL);
@@ -64,7 +64,7 @@ char	*ft_line(char *buffer)
 		return (NULL);
 	while (buffer[i] && buffer[i] != '\n')
 		i++;
-	line = ft_calloc(i + 2, sizeof(char));
+	line = gnl_ft_calloc(i + 2, sizeof(char));
 	if (!line)
 		return (NULL);
 	i = 0;
@@ -84,10 +84,10 @@ char	*read_file(int fd, char *res)
 	int		byte_read;
 
 	if (!res)
-		res = ft_calloc(1, 1);
+		res = gnl_ft_calloc(1, 1);
 	if (!res)
 		return (NULL);
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	buffer = gnl_ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	if (!buffer)
 		return (free(res), NULL);
 	byte_read = 1;
@@ -100,7 +100,7 @@ char	*read_file(int fd, char *res)
 		}
 		buffer[byte_read] = 0;
 		res = ft_free(res, buffer);
-		if (ft_strchr(buffer, '\n'))
+		if (gnl_ft_strchr(buffer, '\n'))
 			break ;
 	}
 	free(buffer);

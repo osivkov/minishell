@@ -6,27 +6,35 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/12 16:40:15 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/14 18:25:29 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 #define MINISHELL_H
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
+
+
+
 #include <signal.h>
 #include "../libft/libft.h"
 // Include other standard libraries as needed
 
+/**
+ * Enum `e_token_type`
+ * Represents different types of tokens that can be found in a shell command.
+ * 
+ * Each token type corresponds to a specific element in the command syntax.
+ * It is used in the lexer and parser to identify different parts of the input.
+ */
+
 typedef enum e_token_type {
-	T_WORD,         // Word (command or argument)
-	T_PIPE,         // Symbol |
-	T_REDIR_IN,     // Symbol <
-	T_REDIR_OUT,    // Symbol >
-	T_REDIR_APPEND, // Symbol >>
-	T_HEREDOC       // Symbol <<
+	T_WORD,			// Word (command or argument)
+	T_PIPE,			// Symbol |
+	T_REDIR_IN,		// Symbol <
+	T_REDIR_OUT,	// Symbol >
+	T_REDIR_APPEND,	// Symbol >>
+	T_HEREDOC		// Symbol <<
 } t_token_type;
 
 
@@ -57,9 +65,9 @@ extern volatile sig_atomic_t g_signal_status;
 
 /* Main Shell structure */
 /* This structure holds the global state of the minishell.
-   It includes the environment variables, the token list and the command list
-   parsed from the input, as well as the last exit status of a command.
-   Additional fields (such as command history, settings, etc.) can be added later. */
+	It includes the environment variables, the token list and the command list
+	parsed from the input, as well as the last exit status of a command.
+	Additional fields (such as command history, settings, etc.) can be added later. */
 typedef struct s_minishell {
 	char	**env;		// Array of environment variables
 	t_token *tokens;		// List of tokens generated from the latest input
@@ -76,9 +84,12 @@ char	**expand_variables(char **args);
 /* Function prototypes for shell management */
 /* These functions initialize, run, and free the main minishell structure */
 t_minishell	*init_minishell(char **env);
-void 		free_cmd(t_cmd *cmd);
-void 		free_tokens(t_token *tokens);
 void		free_minishell(t_minishell *shell);
 int			run_minishell(t_minishell *shell);
+t_token		*process_quotes(char **input, char quote);
 
+
+/*Function for free*/
+void 		free_cmd(t_cmd *cmd);
+void 		free_tokens(t_token *tokens);
 #endif

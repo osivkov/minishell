@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lexer.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
+/*   Updated: 2025/02/14 12:02:23 by osivkov          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 
 #include "minishell.h"
 #include <ctype.h>
@@ -19,7 +31,14 @@ t_token *lexer(char *input)
 		t_token *new_token = malloc(sizeof(t_token));
 		if (!new_token)
 			return (NULL);
-		 
+		 if (*input == '\'' || *input == '\"')
+		{
+			t_token *quoted_token = process_quotes(&input, *input);
+			if (!quoted_token)
+			// Handle error for unclosed quote
+			return (NULL);
+			// Add quoted_token to your linked list of tokens
+		}
 		// If a special character is encountered
 		if (*input == '|' || *input == '<' || *input == '>')
 		{

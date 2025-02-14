@@ -2,8 +2,8 @@
 NAME = minishell
 
 # Compiler and compiler flags
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CC = cc
+CFLAGS = -Wall -Wextra -Werror #-fPIE
 
 # Directories for source files, headers, and object files
 SRC_DIR = src
@@ -19,8 +19,8 @@ SRCS = $(SRC_DIR)/main.c \
 		$(SRC_DIR)/utils/utils.c \
 		$(SRC_DIR)/parser/lexer.c \
 		$(SRC_DIR)/parser/parser.c \
-		# $(SRC_DIR)/parser/quotes.c \
-		# $(SRC_DIR)/parser/expand.c \
+		$(SRC_DIR)/parser/quotes.c \
+		$(SRC_DIR)/parser/expand.c \
 		# $(SRC_DIR)/executor/execute.c \
 		# $(SRC_DIR)/executor/builtins.c \
 		# $(SRC_DIR)/executor/pipes.c \

@@ -1,8 +1,18 @@
-
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parser.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
+/*   Updated: 2025/02/14 14:54:20 by osivkov          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 
 #include "minishell.h"
+#include <stdlib.h>
 
 // Helper function to parse a single command from tokens.
 // It consumes tokens until a T_PIPE or end-of-list is encountered.

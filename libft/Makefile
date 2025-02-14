@@ -32,7 +32,7 @@ OBJ = $(SRC:.c=.o)
 BONUS_OBJ = $(BONUS_SRC:.c=.o)
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror $(INCLUDES)
+CFLAGS = -Wall -Wextra -Werror $(INCLUDES) #-fPIC
 AR = ar rcs
 INCLUDES = -I $(GNL_DIR) -I $(PRINT_DIR)
 
