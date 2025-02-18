@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/14 15:42:41 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/18 14:57:58 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,10 @@ int run_minishell(t_minishell *shell)
 	char		*input;
 	t_token		*tokens;
 	t_token		*temp;
+	t_cmd		*cmd;
 	t_cmd		*cmd_temp;
 	int			i;
+	(void)shell;
 
 	while (1)
 	{
@@ -30,26 +32,17 @@ int run_minishell(t_minishell *shell)
 		input = readline("minishell> ");
 		if (!input)
 		{
-			/* If input is NULL (Ctrl-D pressed), exit the shell */
 			ft_putstr_fd("exit\n", 1);
 			break;
 		}
 
 		if (input[0] != '\0')
-		{
-			add_history(input); /*add_history part of readline lib, with we can use
-			arrow  tow down for listing history*/
-		}
-			tokens = lexer(input);
-			ft_putendl_fd("Tokens:", 1);
-			temp = tokens;
-		
-		t_cmd *cmd = shell->cmd;
-		while (cmd)
-		{
-		cmd->args = expand_variables(cmd->args);
-		cmd = cmd->next;
-		}
+			add_history(input);
+
+		/* Lexical analysis */
+		tokens = lexer(input);
+		ft_putendl_fd("Tokens:", 1);
+		temp = tokens;
 		while (temp)
 		{
 			ft_putstr_fd(temp->value, 1);
@@ -57,8 +50,21 @@ int run_minishell(t_minishell *shell)
 			temp = temp->next;
 		}
 		ft_putchar_fd('\n', 1);
+
+		/* Syntax analysis: group tokens into commands */
 		cmd = parser(tokens);
-		// Debug: print commands (here, just printing arguments)
+		
+		/* Expand variables for each command */
+		{
+			t_cmd *tmp_cmd = cmd;
+			while (tmp_cmd)
+			{
+				tmp_cmd->args = expand_variables(tmp_cmd->args);
+				tmp_cmd = tmp_cmd->next;
+			}
+		}
+
+		/* Debug: print commands (arguments) */
 		ft_putendl_fd("Commands:", 1);
 		cmd_temp = cmd;
 		while (cmd_temp)
@@ -73,24 +79,15 @@ int run_minishell(t_minishell *shell)
 			ft_putchar_fd('\n', 1);
 			cmd_temp = cmd_temp->next;
 		}
-		/* Call the parser here:
-		 * tokens = lexer(input);
-		 * cmd = parser(tokens);
-		 *
-		 * For now, simply print the input as a placeholder.
-		 */
-		/* Free the memory allocated by readline */
+
+		/* Free the memory allocated for this input */
 		free(input);
 		free_tokens(tokens);
 		free_cmd(cmd);
-
-		/* After integrating the parser and executor, here we will:
-		 * - Execute commands (execute(shell->cmd));
-		 * - Free tokens and commands (free_tokens, free_cmd)
-		 */
 	}
 	return (0);
 }
+
 
 
 /*
