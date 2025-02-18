@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/14 12:02:23 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/14 18:40:53 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,11 @@ t_token *lexer(char *input)
 			if (!quoted_token)
 			// Handle error for unclosed quote
 			return (NULL);
+			new_token = quoted_token;
 			// Add quoted_token to your linked list of tokens
 		}
 		// If a special character is encountered
-		if (*input == '|' || *input == '<' || *input == '>')
+		else if (*input == '|' || *input == '<' || *input == '>')
 		{
 			// Determine the token type and its value (e.g., "|" or ">" or ">>")
 			// For simplicity, handle one character
