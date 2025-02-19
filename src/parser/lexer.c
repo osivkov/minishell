@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/14 18:40:53 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/19 13:01:45 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ t_token *lexer(char *input)
 	while (*input)
 	{
 		// Skip spaces
-		while (*input && isspace(*input))
+		while (*input && ft_isspace(*input))
 			input++;
 		if (!*input)
 			break;
@@ -50,6 +50,7 @@ t_token *lexer(char *input)
 				new_token->type = T_PIPE;
 			else if (*input == '<')
 				new_token->type = T_REDIR_IN;
+				
 			else if (*input == '>')
 				new_token->type = T_REDIR_OUT;
 			input++; // Move to the next character
@@ -59,7 +60,7 @@ t_token *lexer(char *input)
 			// Handle a normal word
 			// Gather characters until a space or special character is encountered
 			char *start = input;
-			while (*input && !isspace(*input) && *input != '|' && *input != '<' && *input != '>')
+			while (*input && !ft_isspace(*input) && *input != '|' && *input != '<' && *input != '>')
 				input++;
 			int len = input - start;
 			new_token->value = ft_substr(start, 0, len);

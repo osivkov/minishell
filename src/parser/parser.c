@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/18 14:23:17 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/19 15:04:39 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,10 +83,25 @@ static t_cmd *parse_single_command(t_token **tokens)
 			if (*tokens && (*tokens)->type == T_WORD)
 			{
 				// File or document name
-				if (redir_type == T_REDIR_IN)
+				// funck for heredoc
+				if (redir_type == T_HEREDOC)
+				{
+					//Heredoc processing:
+					int heredoc_fd = handle_heredoc((*tokens)->value);
+					if (heredoc_fd == -1)
+					{
+						free(args);
+						free(cmd);
+						return (NULL);
+					}
+					cmd->infile = heredoc_fd;
+				}
+				else if (redir_type == T_REDIR_IN)
 					cmd->infile = open((*tokens)->value, O_RDONLY);
 				else if (redir_type == T_REDIR_OUT)
 					cmd->outfile = open((*tokens)->value, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+				else if (redir_type == T_REDIR_APPEND)
+					cmd->outfile = open((*tokens)->value, O_CREAT | O_WRONLY | O_APPEND, 0644);
 				// Similarly for T_REDIR_APPEND, T_HEREDOC
 				*tokens = (*tokens)->next;
 				continue;

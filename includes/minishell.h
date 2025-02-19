@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/14 18:25:29 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/19 15:01:17 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,9 +87,10 @@ t_minishell	*init_minishell(char **env);
 void		free_minishell(t_minishell *shell);
 int			run_minishell(t_minishell *shell);
 t_token		*process_quotes(char **input, char quote);
+int			handle_heredoc(char *delimeter);
 
-
-/*Function for free*/
+/*Function for free and utils*/
+int			ft_isspace(int c);
 void 		free_cmd(t_cmd *cmd);
 void 		free_tokens(t_token *tokens);
 #endif

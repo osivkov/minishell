@@ -11,7 +11,7 @@ SRC = ft_strlen.c ft_isalpha.c ft_isdigit.c \
       ft_strjoin.c ft_strtrim.c ft_split.c \
       ft_itoa.c ft_strmapi.c ft_striteri.c \
       ft_putchar_fd.c ft_putstr_fd.c ft_putendl_fd.c \
-      ft_putnbr_fd.c \
+      ft_putnbr_fd.c ft_strcmp.c\
       $(GNL_DIR)/get_next_line.c \
       $(GNL_DIR)/get_next_line_utils.c \
       $(PRINT_DIR)/ft_printf.c \
@@ -32,7 +32,7 @@ OBJ = $(SRC:.c=.o)
 BONUS_OBJ = $(BONUS_SRC:.c=.o)
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror $(INCLUDES) #-fPIC
+CFLAGS = -Wall -Wextra -Werror $(INCLUDES) 
 AR = ar rcs
 INCLUDES = -I $(GNL_DIR) -I $(PRINT_DIR)
 
