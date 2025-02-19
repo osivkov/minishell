@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/19 13:01:45 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/19 17:29:03 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,20 @@ t_token *lexer(char *input)
 		// If a special character is encountered
 		else if (*input == '|' || *input == '<' || *input == '>')
 		{
-			// Determine the token type and its value (e.g., "|" or ">" or ">>")
-			// For simplicity, handle one character
+			if (*input == '<' && *(input + 1) == '<')
+			{
+				new_token->value = ft_strdup("<<");
+				new_token->type = T_HEREDOC;
+				input += 2;
+			}
+			else if (*input == '>' && *(input + 1) == '>')
+			{
+				new_token->value = ft_strdup(">>");
+				new_token->type = T_REDIR_APPEND;
+				input += 2;
+			}
+			else
+			{
 			new_token->value = ft_strdup((char[]){*input, '\0'});
 			if (*input == '|')
 				new_token->type = T_PIPE;
@@ -54,6 +66,7 @@ t_token *lexer(char *input)
 			else if (*input == '>')
 				new_token->type = T_REDIR_OUT;
 			input++; // Move to the next character
+			}
 		}
 		else
 		{

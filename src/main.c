@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/18 14:57:58 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/19 17:54:48 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,6 +145,35 @@ t_minishell *init_minishell(char **env)
 }
 
 
+static void	print_tokens(t_token *tokens)
+{
+	while(tokens)
+	{
+		printf("Token: '%s' (Type: %d)\n", tokens->value, tokens->type);
+		tokens = tokens->next;
+	}
+}
+
+static void	print_commands(t_cmd *cmd)
+{
+	while (cmd)
+	{
+		int i = 0;
+		printf("Commands: \n");
+		while (cmd->args && cmd->args[i])
+		{
+			printf("  args[%d]: '%s'\n", i, cmd->args[i]);
+			i++;
+		}
+		if (cmd->infile != 1)
+		{
+			printf("  infile: %d\n", cmd->infile);
+		}
+		if (cmd->outfile != 1)
+			printf("  outfile: %d\n", cmd->outfile);
+		cmd = cmd->next;
+	}
+}
 
 int	main(int argc, char **argv, char **env)
 {
@@ -164,3 +193,44 @@ int	main(int argc, char **argv, char **env)
 	free_minishell(shell);
 	return (shell->last_exit);
 }
+
+// int main(void)
+// {
+// 	char *input;
+// 	t_token *tokens;
+// 	t_cmd *cmd;
+
+//     while (1)
+//     {
+// 	// Отображаем приглашение и считываем строку
+// 	input = readline("minishell_test> ");
+// 	if (!input)
+// 	{
+// 	printf("exit\n");
+// 	break; // Если введён EOF (Ctrl-D), завершаем работу
+// 	}
+// 	if (input[0] == '\0')
+// 	{
+// 	free(input);
+// 	continue;
+// 	}
+// 	add_history(input);
+
+// 	// Лексический анализ: разбиваем ввод на токены
+// 	tokens = lexer(input);
+// 	printf("\nTokens:\n");
+// 	print_tokens(tokens);
+
+// 	// Синтаксический анализ: группируем токены в команды (t_cmd)
+// 	cmd = parser(tokens);
+// 	printf("\nCommands:\n");
+// 	print_commands(cmd);
+
+// 	// Освобождаем память, выделенную для данной итерации
+// 	free(input);
+// 	free_tokens(tokens);
+// 	free_cmd(cmd);
+// 	printf("\n");
+// 	}
+// 	return 0;
+// }
