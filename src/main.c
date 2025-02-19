@@ -145,35 +145,35 @@ t_minishell *init_minishell(char **env)
 }
 
 
-static void	print_tokens(t_token *tokens)
-{
-	while(tokens)
-	{
-		printf("Token: '%s' (Type: %d)\n", tokens->value, tokens->type);
-		tokens = tokens->next;
-	}
-}
+// static void	print_tokens(t_token *tokens)
+// {
+// 	while(tokens)
+// 	{
+// 		printf("Token: '%s' (Type: %d)\n", tokens->value, tokens->type);
+// 		tokens = tokens->next;
+// 	}
+// }
 
-static void	print_commands(t_cmd *cmd)
-{
-	while (cmd)
-	{
-		int i = 0;
-		printf("Commands: \n");
-		while (cmd->args && cmd->args[i])
-		{
-			printf("  args[%d]: '%s'\n", i, cmd->args[i]);
-			i++;
-		}
-		if (cmd->infile != 1)
-		{
-			printf("  infile: %d\n", cmd->infile);
-		}
-		if (cmd->outfile != 1)
-			printf("  outfile: %d\n", cmd->outfile);
-		cmd = cmd->next;
-	}
-}
+// static void	print_commands(t_cmd *cmd)
+// {
+// 	while (cmd)
+// 	{
+// 		int i = 0;
+// 		printf("Commands: \n");
+// 		while (cmd->args && cmd->args[i])
+// 		{
+// 			printf("  args[%d]: '%s'\n", i, cmd->args[i]);
+// 			i++;
+// 		}
+// 		if (cmd->infile != 1)
+// 		{
+// 			printf("  infile: %d\n", cmd->infile);
+// 		}
+// 		if (cmd->outfile != 1)
+// 			printf("  outfile: %d\n", cmd->outfile);
+// 		cmd = cmd->next;
+// 	}
+// }
 
 int	main(int argc, char **argv, char **env)
 {
