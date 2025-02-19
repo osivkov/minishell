@@ -26,8 +26,6 @@ t_token *lexer(char *input)
 			input++;
 		if (!*input)
 			break;
-		
-		// Create a new token
 		t_token *new_token = malloc(sizeof(t_token));
 		if (!new_token)
 			return (NULL);

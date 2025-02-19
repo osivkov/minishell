@@ -14,29 +14,23 @@
 #include "minishell.h"
 #include <stdlib.h>
 
-// Helper function to process quoted strings in the lexer.
-// 'quote' is the opening quote character (' or ").
-// The function returns a newly allocated token containing the content inside the quotes.
+
 t_token *process_quotes(char **input, char quote)
 {
 	t_token *token;
 	char	*start;
-	int		len = 0;
+	int		len;
 
-	// Move past the opening quote.
+	len = 0;
 	(*input)++;
 	start = *input;
-	// Find the closing quote.
 	while (**input && **input != quote)
 	{
 		len++;
 		(*input)++;
 	}
-	// If the closing quote was not found, handle error (for now, we return NULL).
 	if (**input != quote)
 		return (NULL);
-	// Move past the closing quote.
-
 	(*input)++;
 	token = malloc(sizeof(t_token));
 	if (!token)

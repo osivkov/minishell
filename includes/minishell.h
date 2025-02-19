@@ -62,6 +62,7 @@ typedef struct s_cmd {
 
 /* Global variable for signal handling (only one is allowed) */
 extern volatile sig_atomic_t g_signal_status;
+void	handle_sigint(int sig);
 
 /* Main Shell structure */
 /* This structure holds the global state of the minishell.

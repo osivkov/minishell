@@ -13,8 +13,11 @@
 #include "minishell.h"
 #include <readline/readline.h>
 #include <readline/history.h>
+// #define _POSIX_C_SOURCE 200809L
+// #define _XOPEN_SOURCE 700
 #include <signal.h>
 
+volatile	sig_atomic_t g_signal_status = 0;
 
 int run_minishell(t_minishell *shell)
 {
@@ -178,10 +181,21 @@ t_minishell *init_minishell(char **env)
 int	main(int argc, char **argv, char **env)
 {
 	t_minishell	*shell;
-
+	struct sigaction sa;
 	(void)argc;
 	(void)argv;
 
+
+	// Set up signal handler for SIGINT (Ctrl-C)
+	sa.sa_handler = handle_sigint;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART; // Restart interrupted syscalls
+	if (sigaction(SIGINT, &sa, NULL) == -1)
+	{
+		perror("sigaction");
+		return (1);
+	}
+	signal(SIGQUIT, SIG_IGN);
 	shell = init_minishell(env);
 	if (!shell)
 	{

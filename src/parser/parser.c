@@ -148,7 +148,6 @@ t_cmd *parser(t_token *tokens)
 			tokens = tokens->next;
 			continue;
 		}
-
 		// Parse a single command from the tokens.
 		new_cmd = parse_single_command(&tokens);
 		if (!new_cmd)
