@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/19 17:54:48 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/20 10:16:56 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,12 +59,12 @@ int run_minishell(t_minishell *shell)
 		
 		/* Expand variables for each command */
 		{
-			t_cmd *tmp_cmd = cmd;
-			while (tmp_cmd)
-			{
-				tmp_cmd->args = expand_variables(tmp_cmd->args);
-				tmp_cmd = tmp_cmd->next;
-			}
+			// t_cmd *tmp_cmd = cmd;
+			// while (tmp_cmd)
+			// {
+			// 	tmp_cmd->args = expand_variables(tmp_cmd->args);
+			// 	tmp_cmd = tmp_cmd->next;
+			// }
 		}
 
 		/* Debug: print commands (arguments) */

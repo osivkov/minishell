@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/19 17:48:57 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/20 09:40:24 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ static t_cmd *parse_single_command(t_token **tokens)
 		}
 		runner = runner->next;
 	}
-
 	// Allocate memory for the arguments array
 	char **args = malloc(sizeof(char*) * (arg_count + 1));
 	if (!args)

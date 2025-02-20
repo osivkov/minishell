@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/19 15:01:17 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/20 10:55:17 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,20 +78,28 @@ typedef struct s_minishell {
 }	t_minishell;
 
 /* Function prototypes for parsing */
-t_token	*lexer(char *input);
-t_cmd	*parser(t_token *tokens);
-char	**expand_variables(char **args);
-
-/* Function prototypes for shell management */
-/* These functions initialize, run, and free the main minishell structure */
-t_minishell	*init_minishell(char **env);
-void		free_minishell(t_minishell *shell);
-int			run_minishell(t_minishell *shell);
+t_token		*lexer(char *input);
+t_cmd		*parser(t_token *tokens);
 t_token		*process_quotes(char **input, char quote);
 int			handle_heredoc(char *delimeter);
+/*list lexer_utils functions*/
+void	token_to_list(t_token **head, t_token **current, t_token *new_token);
+t_token	*create_double_operator_token(char **input);
+t_token	*create_single_operator_token(char **input);
+t_token	*create_special_token(char **input);
+t_token	*create_word_token(char **input);
+// char	**expand_variables(char **args);
 
-/*Function for free and utils*/
-int			ft_isspace(int c);
+/*Function for runn shell*/
+t_minishell	*init_minishell(char **env);
+int			run_minishell(t_minishell *shell);
+/* Function prototypes for shell management */
+/* These functions initialize, run, and free the main minishell structure */
+void		free_minishell(t_minishell *shell);
 void 		free_cmd(t_cmd *cmd);
 void 		free_tokens(t_token *tokens);
+
+/*Function for utils*/
+int			ft_isspace(int c);
+
 #endif

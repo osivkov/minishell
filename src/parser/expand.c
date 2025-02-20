@@ -6,13 +6,13 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 14:50:09 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/14 15:36:24 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/20 10:23:06 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include "minishell.h"
-/*getenv - used to get the values of environment variables */
+/*getenv - used to get the values of environment variables 
 char	**expand_variables(char **args)
 {
 	int i;
@@ -54,4 +54,4 @@ char	**expand_variables(char **args)
 		i++;
 	}
 	return (args);
-}
+} */
