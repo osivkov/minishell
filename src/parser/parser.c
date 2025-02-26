@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/20 09:40:24 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/24 13:59:20 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ static t_cmd *parse_single_command(t_token **tokens)
 
 			if (*tokens && (*tokens)->type == T_WORD)
 			{
-				// File or document name
+				// File or document name`
 				// funck for heredoc
 				if (redir_type == T_HEREDOC)
 				{
