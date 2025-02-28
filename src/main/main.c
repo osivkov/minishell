@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 14:40:12 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/28 15:13:40 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int run_minishell(t_minishell *shell)
             free(input);
             continue;
         }
-
+		expand_command_variables(shell, cmd);
         // Здесь можно вызвать вашу (пока упрощённую) функцию execute
         // execute(shell, cmd);
 
