@@ -21,7 +21,13 @@ SRCS = $(SRC_DIR)/main.c \
 		$(SRC_DIR)/parser/parser.c \
 		$(SRC_DIR)/parser/quotes.c \
 		$(SRC_DIR)/parser/expand.c \
+<<<<<<< Updated upstream
 		# $(SRC_DIR)/executor/execute.c \
+=======
+		$(SRC_DIR)/parser/type/heredoc.c \
+		$(SRC_DIR)/signals/signals.c \
+		$(SRC_DIR)/executor/execute.c \
+>>>>>>> Stashed changes
 		# $(SRC_DIR)/executor/builtins.c \
 		# $(SRC_DIR)/executor/pipes.c \
 		# $(SRC_DIR)/executor/redirects.c \

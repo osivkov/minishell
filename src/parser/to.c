@@ -1,14 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   parser.c                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 14:33:07 by osivkov          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+
 
 #include "minishell.h"
 #include <stdlib.h>
@@ -160,9 +150,6 @@ static t_cmd *parse_single_command(t_minishell *shell, t_token **tokens)
     return cmd;
 }
 
-
-
-// Main parser function that processes the entire token list into a command list.
 t_cmd *parser(t_minishell *shell, t_token *tokens)
 {
     t_cmd   *cmd_list = NULL;
@@ -176,7 +163,7 @@ t_cmd *parser(t_minishell *shell, t_token *tokens)
         {
             fprintf(stderr, "minishell: syntax error near unexpected token `|`\n");
             shell->last_exit = 2;
-            free_cmd(cmd_list);
+            free_cmd_list(cmd_list);
             return NULL;
         }
 
@@ -185,7 +172,7 @@ t_cmd *parser(t_minishell *shell, t_token *tokens)
         {
             // Если parse_single_command вернул NULL => была ошибка
             // parser завершает разбор; освобождаем уже созданный список команд
-            free_cmd(cmd_list);
+            free_cmd_list(cmd_list);
             return NULL;
         }
 
@@ -208,4 +195,7 @@ t_cmd *parser(t_minishell *shell, t_token *tokens)
 
     return cmd_list;
 }
+
+
+
 

@@ -6,7 +6,11 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
+<<<<<<< Updated upstream
 /*   Updated: 2025/02/14 18:25:29 by osivkov          ###   ########.fr       */
+=======
+/*   Updated: 2025/02/28 09:19:05 by osivkov          ###   ########.fr       */
+>>>>>>> Stashed changes
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +32,7 @@
  * It is used in the lexer and parser to identify different parts of the input.
  */
 
-typedef enum e_token_type {
+typedef enum	e_token_type {
 	T_WORD,			// Word (command or argument)
 	T_PIPE,			// Symbol |
 	T_REDIR_IN,		// Symbol <
@@ -37,6 +41,13 @@ typedef enum e_token_type {
 	T_HEREDOC		// Symbol <<
 } t_token_type;
 
+typedef enum	e_parse_err {
+	PARSE_OK,
+	PARSE_HEREDOC_ERROR,
+	PARSE_NO_FILENAME,
+	PARSE_UNCLOSED_QUOTE,
+	PARSE_UNKNOWN_TOKEN
+}	t_parse_err; 
 
 /* Token structure */
 /* This structure represents a single token extracted from the input.
@@ -56,7 +67,8 @@ typedef struct s_cmd {
 	char	**args;		// Argument array (first element is the command)
 	int		infile;		// File descriptor for input redirection
 	int		outfile;		// File descriptor for output redirection
-	int		is_builtin;		// Flag indicating whether the command is built-in
+	int		is_builtin;
+	// int		parsing_error;// Flag indicating whether the command is built-in
 	struct s_cmd	*next;		// Next command in the pipeline (if using pipes)
 }	t_cmd;
 
@@ -76,11 +88,30 @@ typedef struct s_minishell {
 	// Additional fields can be added here (e.g., history, configuration settings, etc.)
 }	t_minishell;
 
+int execute(t_minishell *shell, t_cmd *cmd);
 /* Function prototypes for parsing */
+<<<<<<< Updated upstream
 t_token	*lexer(char *input);
 t_cmd	*parser(t_token *tokens);
 char	**expand_variables(char **args);
 
+=======
+t_token		*lexer(t_minishell *shell, char *input);
+t_cmd 		*parser(t_minishell *shell, t_token *tokens);
+t_token 	*process_quotes(t_minishell *shell, char **input, char quote_char);
+int			handle_heredoc(char *delimeter);
+/*list lexer_utils functions*/
+void	token_to_list(t_token **head, t_token **current, t_token *new_token);
+t_token	*create_double_operator_token(char **input);
+t_token	*create_single_operator_token(char **input);
+t_token	*create_special_token(char **input);
+t_token	*create_word_token(char **input);
+// char	**expand_variables(char **args);
+
+/*Function for runn shell*/
+t_minishell	*init_minishell(char **env);
+int			run_minishell(t_minishell *shell);
+>>>>>>> Stashed changes
 /* Function prototypes for shell management */
 /* These functions initialize, run, and free the main minishell structure */
 t_minishell	*init_minishell(char **env);
