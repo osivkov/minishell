@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 15:13:40 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/28 16:56:28 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,60 +17,92 @@
 // #define _XOPEN_SOURCE 700
 #include <signal.h>
 #include <bits/sigaction.h>
+#include <limits.h>  // for PATH_MAX
+#include <unistd.h>  // for getcwd
 
 
 volatile	sig_atomic_t g_signal_status = 0;
 
-int run_minishell(t_minishell *shell)
+#ifndef PATH_MAX
+#define PATH_MAX 4096 
+#endif
+
+char	*generate_prompt(t_minishell *shell)
 {
-    char        *input;
-    t_token     *tokens;
-    t_cmd       *cmd;
+	char	*user;
+	char	cwd[PATH_MAX];
+	char	*temp;
+	char	*prompt;
 
-    while (1)
-    {
-        // Выводим приглашение и считываем ввод
-        input = readline("minishell> ");
-        if (!input)
-        {
-            // readline вернул NULL => EOF (Ctrl+D)
-            ft_putstr_fd("exit\n", 1);
-            break;
-        }
+	// Get the username from our environment
+	user = get_env_value(shell, "USER");
+	// Get the current working directory
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
+		cwd[0] = '\0';
 
-        // Если строка не пустая, добавляем в историю
-        if (input[0] != '\0')
-            add_history(input);
+	// Form the prompt in the format "user@cwd$ "
+	temp = ft_strjoin(user, "@");
+	prompt = ft_strjoin(temp, cwd);
+	free(temp);
+	temp = ft_strjoin(prompt, "$ ");
+	free(prompt);
+	prompt = temp;
+	return (prompt);
+}
 
-        // ЛЕКСЕР: преобразуем строку в список токенов
-        tokens = lexer(shell, input);
-        // Если произошла ошибка лексера, например незакрытые кавычки,
-        // shell->last_exit может быть = 2, а tokens = NULL
-        if (!tokens && shell->last_exit == 2)
-        {
-            free(input);
-            continue; // пропускаем парсер/исполнитель, предлагаем новый ввод
-        }
 
-        // ПАРСЕР: строим список команд (t_cmd) из списка токенов
-        cmd = parser(shell, tokens);
-        // Аналогичная проверка на ошибку парсера
-        if (!cmd && shell->last_exit == 2)
-        {
-            free_tokens(tokens);
-            free(input);
-            continue;
-        }
+
+int	run_minishell(t_minishell *shell)
+{
+	char	*input;
+	t_token	*tokens;
+	t_cmd	*cmd;
+	char	*prompt;
+
+	while (1)
+	{
+		// Generate the prompt dynamically (e.g., "user@cwd$ ")
+		prompt = generate_prompt(shell);
+		// Read input from the user using the generated prompt
+		input = readline(prompt);
+		free(prompt);
+		if (!input)
+		{
+			// If readline returns NULL, it indicates EOF (e.g., Ctrl+D)
+			ft_putstr_fd("exit\n", 1);
+			break;
+		}
+		// If the input is not empty, add it to the history
+		if (input[0] != '\0')
+			add_history(input);
+		// LEXER: Convert the input string into a list of tokens
+		tokens = lexer(shell, input);
+		// If a lexer error occurs (e.g., unmatched quotes),
+		// shell->last_exit is set to 2 and tokens is NULL
+		if (!tokens && shell->last_exit == 2)
+		{
+			free(input);
+			continue; // Skip parser/execution and prompt for new input
+		}
+		// PARSER: Build a command list (t_cmd) from the token list
+		cmd = parser(shell, tokens);
+		// If a parser error occurs, free tokens and input, then prompt again
+		if (!cmd && shell->last_exit == 2)
+		{
+			free_tokens(tokens);
+			free(input);
+			continue;
+		}
+		// Expand environment variables in all command arguments
 		expand_command_variables(shell, cmd);
-        // Здесь можно вызвать вашу (пока упрощённую) функцию execute
-        // execute(shell, cmd);
-
-        // Освобождаем токены, команды и саму строку
-        free_tokens(tokens);
-        free_cmd(cmd);
-        free(input);
-    }
-    return (0);
+		// Here, you can call your (currently simplified) execute function
+		// execute(shell, cmd);
+		// Free tokens, command list, and input after execution
+		free_tokens(tokens);
+		free_cmd(cmd);
+		free(input);
+	}
+	return (0);
 }
 
 

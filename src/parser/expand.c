@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 14:50:09 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 15:21:16 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/28 16:51:15 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 	current values ​​from the environment or the current return code.*/
 // Helper function: search for the variable's value in shell->env.
 // Each variable is represented as "KEY=VALUE".
-static char	*get_env_value(t_minishell *shell, const char *var)
+char	*get_env_value(t_minishell *shell, const char *var)
 {
 	int		i;
 	size_t	len;

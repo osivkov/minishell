@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 15:23:03 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/28 16:51:31 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ typedef struct s_minishell {
 
 int execute(t_minishell *shell, t_cmd *cmd);
 void	expand_command_variables(t_minishell *shell, t_cmd *cmd_list);
+char	*get_env_value(t_minishell *shell, const char *var);
 /* Function prototypes for parsing */
 t_token		*lexer(t_minishell *shell, char *input);
 t_cmd 		*parser(t_minishell *shell, t_token *tokens);
