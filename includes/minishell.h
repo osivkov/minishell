@@ -6,13 +6,10 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-<<<<<<< Updated upstream
-/*   Updated: 2025/02/14 18:25:29 by osivkov          ###   ########.fr       */
-=======
-/*   Updated: 2025/02/28 09:19:05 by osivkov          ###   ########.fr       */
->>>>>>> Stashed changes
+/*   Updated: 2025/02/28 14:40:29 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef MINISHELL_H
 #define MINISHELL_H
@@ -74,6 +71,7 @@ typedef struct s_cmd {
 
 /* Global variable for signal handling (only one is allowed) */
 extern volatile sig_atomic_t g_signal_status;
+void	handle_sigint(int sig);
 
 /* Main Shell structure */
 /* This structure holds the global state of the minishell.
@@ -90,12 +88,6 @@ typedef struct s_minishell {
 
 int execute(t_minishell *shell, t_cmd *cmd);
 /* Function prototypes for parsing */
-<<<<<<< Updated upstream
-t_token	*lexer(char *input);
-t_cmd	*parser(t_token *tokens);
-char	**expand_variables(char **args);
-
-=======
 t_token		*lexer(t_minishell *shell, char *input);
 t_cmd 		*parser(t_minishell *shell, t_token *tokens);
 t_token 	*process_quotes(t_minishell *shell, char **input, char quote_char);
@@ -111,16 +103,13 @@ t_token	*create_word_token(char **input);
 /*Function for runn shell*/
 t_minishell	*init_minishell(char **env);
 int			run_minishell(t_minishell *shell);
->>>>>>> Stashed changes
 /* Function prototypes for shell management */
 /* These functions initialize, run, and free the main minishell structure */
-t_minishell	*init_minishell(char **env);
 void		free_minishell(t_minishell *shell);
-int			run_minishell(t_minishell *shell);
-t_token		*process_quotes(char **input, char quote);
-
-
-/*Function for free*/
 void 		free_cmd(t_cmd *cmd);
 void 		free_tokens(t_token *tokens);
+
+/*Function for utils*/
+int			ft_isspace(int c);
+
 #endif

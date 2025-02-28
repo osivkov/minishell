@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/12 15:59:20 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/02/28 14:44:26 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,4 +79,20 @@ void free_minishell(t_minishell *shell)
 	free_tokens(shell->tokens);
 	free_cmd(shell->cmd);
 	free(shell);
+}
+
+
+int	ft_isspace(int c)
+{
+	if (c == ' ' ||
+		c == '\t' ||
+		c == '\n' ||
+		c == '\v' ||
+		c == '\f' ||
+		c == '\f' ||
+		c == '\r')
+	{
+		return (1);
+	}	
+	return (0);
 }
