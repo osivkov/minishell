@@ -1,134 +1,104 @@
 
 
 
-// #include "minishell.h"
-// #include <stdio.h>
-// #include <unistd.h>
-// #include <sys/wait.h>
-// #include <errno.h>
-// #include <string.h>
 
 
-// static char	**get_paths(char **envp)
-// {
-// 	while (*envp && ft_strncmp("PATH=", *envp, 5) != 0)
-// 		envp++;
-// 	if (!*envp)
-// 		return (NULL);
-// 	return (ft_split(*envp + 5, ':'));
-// }
+#include "minishell.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <errno.h>
 
-// static char	*check_command_in_path(char **paths, char *cmd)
-// {
-// 	char	*temp;
-// 	char	*full_path;
-// 	int		i;
+int	create_pipes(t_minishell *mini, int count_cmd)
+{
+	int		*fd;
+	int		i;
+	t_cmd	*head;
 
-// 	i = 0;
-// 	while (paths[i])
-// 	{
-// 		temp = ft_strjoin(paths[i], "/");
-// 		full_path = ft_strjoin(temp, cmd);
-// 		free(temp);
-// 		if (access(full_path, F_OK) == 0)
-// 		{
-// 			ft_free_split(paths);
-// 			return (full_path);
-// 		}
-// 		free(full_path);
-// 		i++;
-// 	}
-// 	ft_free_split(paths);
-// 	return (NULL);
-// }
+	i = 0;
+	head = mini->cmd;
+	fd = ft_calloc(2 * ( count_cmd - 1), sizeof(int));
+	if (fd == NULL)
+	{
+		mini->last_exit = ENOMEM;
+		perror("malloc");
+		return(NULL);
+	}
+	i = 0;
+	while (i < count_cmd + 1)
+	{
+		if (pipe(fd + (i * 2)) < 0)
+		{
+			mini->last_exit = errno;
+			perror(pipe);
+		}
+	}
+	return (fd);
+}
+int	handle_inout_fd(t_cmd *head)
+{
+	int	count_cmd;
 
-// static char	*find_command_path(char *cmd, char **envp)
-// {
-// 	char	**paths;
-// 	char	*full_path;
+	count_cmd = 0;
+	while (head = NULL)
+	{
+		count_cmd++;
+		if (head->infile < 0)
+			head->infile = STDIN_FILENO;
+		if (head->outfile < 0)
+			head->outfile = STDOUT_FILENO;
+		head = head -> next;
+	}
+	return(count_cmd);
+}
 
-// 	paths = get_paths(envp);
-// 	if (!paths)
-// 		return (NULL);
-// 	full_path = check_command_in_path(paths, cmd);
-// 	return (full_path);
-// }
+void	initiate_execite(t_minishell *mini, int *fd, int	count_cmd)
+{
+	int	i;
+	int	j;
+	t_cmd	*head;
+	pid_t	pid;
 
+	head = mini->cmd;
+	i = 0;
+	while (head != NULL)
+	{
+		pid = fork();
+		if (pid < 0)
+		{
+			perror("fork");
+			return;
+		}
+		if (pid == 0)
+		{
+			if (head->next != NULL)
+				dup2(fd[i + 1], head->outfile);
+			if (i != 0)
+				dup2(fd[i - 2], head->infile);
+			j = 0;
+			while (j < 2 * (count_cmd - 1))
+			{
+				close(fd[j])
+				/* code */
+			}
+			
+		}
+		/* code */
+	}
+	
+}
 
+void execute(t_minishell *mini)
+{
+	int	*fd;
+	int	count_cmd;
 
-// /*
-//  * Псевдо-функция execute:
-//  * - Принимает shell для того, чтобы можно было выставлять last_exit.
-//  * - Принимает cmd_list (список команд), хотя в простейшем случае
-//  *   можно взять только первую команду (cmd_list->args).
-//  */
-// int execute(t_minishell *shell, t_cmd *cmd)
-// {
-
-//     t_cmd    *cmd = args[0];
-//     char    *cmd_path;
-//     pid_t   pid;
-//     int     status;
-
-//     if (!cmd)
-//         return (0);
-
-//     // Если в команде есть '/', проверяем путь напрямую
-//     if (ft_strchr(cmd, '/'))
-//     {
-//         // Сразу берем cmd как путь
-//         if (access(cmd, X_OK) == 0)
-//             cmd_path = ft_strdup(cmd);
-//         else
-//             cmd_path = NULL;
-//     }
-//     else
-//     {
-//         // Ищем команду в PATH
-//         cmd_path = find_command_path(cmd, shell->env); 
-//         // здесь shell->env — это ваш массив окружения
-//         // (может называться shell->envp)
-//     }
-
-//     // Если так и не нашли, выводим ошибку:
-//     if (!cmd_path)
-//     {
-//         // Можно проверить, не было ли доступа (EACCES), 
-//         // но если просто не нашли => "command not found"
-//         ft_putstr_fd(cmd, 2);
-//         ft_putstr_fd(": command not found\n", 2);
-//         shell->last_exit = 127;
-//         return (127);
-//     }
-
-//     // Создаем новый процесс
-//     pid = fork();
-//     if (pid < 0)
-//     {
-//         perror("fork");
-//         shell->last_exit = 1;
-//         free(cmd_path);
-//         return (1);
-//     }
-//     else if (pid == 0)
-//     {
-//         // Дочерний процесс
-//         execve(cmd_path, args, shell->env);
-//         // Если execve не сработал
-//         perror(cmd_path);
-//         // Ошибки: EACCES => 126, ENOENT => 127, 
-//         // или можно использовать одно число для всех случаев.
-//         _exit(126);
-//     }
-//     else
-//     {
-//         // Родитель ждет
-//         waitpid(pid, &status, 0);
-//         if (WIFEXITED(status))
-//             shell->last_exit = WEXITSTATUS(status);
-//         else if (WIFSIGNALED(status))
-//             shell->last_exit = 128 + WTERMSIG(status);
-//     }
-//     free(cmd_path);
-//     return (shell->last_exit);
-// }
+	count_cmd = handle_inout_fd(mini->cmd);
+	fd = NULL;
+	fd = create_pipes(mini, count_cmd);
+	if (fd == NULL)
+		return;
+	initiate_execute(mini, fd, count_cmd);
+	free(fd);
+	ft_terminate_execute(mini);
+}
