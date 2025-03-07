@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/04 16:07:15 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/07 16:40:49 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,6 @@
 
 volatile	sig_atomic_t g_signal_status = 0;
 
-#ifndef PATH_MAX
-#define PATH_MAX 4096 
-#endif
 
 char	*generate_prompt(t_minishell *shell)
 {
@@ -42,7 +39,17 @@ char	*generate_prompt(t_minishell *shell)
 
 	// Form the prompt in the format "user@cwd$ "
 	temp = ft_strjoin(user, "@");
+		if(!temp)
+		{
+			ft_printf("Generate_promp1");
+			return (NULL);
+		}
 	prompt = ft_strjoin(temp, cwd);
+	if (!prompt)
+	{
+		ft_printf("Generate_promp2");
+		return(NULL);
+	}
 	free(temp);
 	temp = ft_strjoin(prompt, "$ ");
 	free(prompt);
@@ -50,7 +57,44 @@ char	*generate_prompt(t_minishell *shell)
 	return (prompt);
 }
 
+void debug_print_tokens(t_token *tokens)
+{
+	printf("=======Tokens============\n");
+	while(tokens)
+	{
+		printf("Tipe token: %d, value: '%s'\n",tokens->type, tokens->value ? tokens->value : "NULL");
+		tokens = tokens->next;
+	}
+	printf("======================\n");
+}
 
+void print_cmds(t_cmd *cmd)
+{
+	int i = 0;
+
+	printf("=====List Comands=====\n");
+		while (cmd)
+		{
+			printf("Commans #%d:\n",i);
+			if (cmd->args)
+			{
+				int j = 0;
+				while (cmd->args[j])
+				{
+					printf("ARGUMENS %d: '%s'\n",j, cmd->args[j]);
+					j++;
+				}
+			}
+			else
+			{
+				printf(" NO arguments !\n");
+			}
+		printf( "infile: %d, outfile: %d\n", cmd->infile,cmd->outfile);
+		cmd = cmd->next;
+		i++;
+		}
+	printf("================");
+}
 
 int	run_minishell(t_minishell *shell)
 {
@@ -65,7 +109,7 @@ int	run_minishell(t_minishell *shell)
 		prompt = generate_prompt(shell);
 		// Read input from the user using the generated prompt
 		input = readline(prompt);
-		free(prompt);
+		// free(prompt);
 		if (!input)
 		{
 			// If readline returns NULL, it indicates EOF (e.g., Ctrl+D)
@@ -77,6 +121,8 @@ int	run_minishell(t_minishell *shell)
 			add_history(input);
 		// LEXER: Convert the input string into a list of tokens
 		tokens = lexer(shell, input);
+		debug_print_tokens(tokens);
+		
 		// If a lexer error occurs (e.g., unmatched quotes),
 		// shell->last_exit is set to 2 and tokens is NULL
 		if (!tokens && shell->last_exit == 2)
@@ -86,6 +132,7 @@ int	run_minishell(t_minishell *shell)
 		}
 		// PARSER: Build a command list (t_cmd) from the token list
 		cmd = parser(shell, tokens);
+		print_cmds(cmd);
 		// If a parser error occurs, free tokens and input, then prompt again
 		if (!cmd && shell->last_exit == 2)
 		{
