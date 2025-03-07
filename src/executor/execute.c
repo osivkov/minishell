@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 09:52:30 by marvin            #+#    #+#             */
-/*   Updated: 2025/03/07 16:19:56 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/07 19:33:34 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,7 +215,7 @@ char	*get_final_path(t_minishell *mini, char **all_path, char *path)
 		full_path = ft_strjoin(all_path[i], path);
 		if (full_path == NULL)
 			return (ml_ft_free(all_path, path), mini->last_exit = errno, perror("malloc"), NULL);
-		if (access(full_path, F_OK || X_OK) == 0)
+		if (access(full_path, F_OK | X_OK) == 0)
 			return (ml_ft_free(all_path, path), full_path);
 		i++;
 	}
@@ -661,6 +661,14 @@ int	ft_exit(t_minishell *mini, t_cmd *current_cmd)
 //will return 1 on critical failure. Will return 0 otherwise.
 int	begin_exec_cmd(t_minishell *mini, t_cmd *current_cmd)
 {
+	int i = 0;
+
+	printf("Debug: Begining execution part %s\n", current_cmd->args[i]);
+	while (current_cmd->args[i])
+	{
+		printf("Debug:args[%d] = '%s'\n", i , current_cmd->args[i]);
+		i++;
+	}
 	if (ft_strncmp(current_cmd->args[0], "cd", 3) == 0)
 		return (ft_cd(mini, current_cmd));
 	else if (ft_strncmp(current_cmd->args[0], "echo", 5) == 0)
@@ -828,12 +836,37 @@ void	execute(t_minishell *mini)
 {
 	int		*fd;
 	int		count_cmd;
+	int		i;
+	int		j;
+	t_cmd	*head;
 
+	i = 0;
+	j = 0;
+	head = mini->cmd;
+	printf("before  inout\n");
+	if (mini->cmd == NULL)
+	{
+		printf("cmd is NULL\n");
+	}
+	while (head != NULL)
+	{
+		i = 0;
+		printf ("cmd %d\n", ++j);
+		while (head->args[i] != NULL)
+		{
+			printf("args[%d] = %s\n", i, head->args[i]);
+			i++;
+		}
+		head = head->next;
+	}
 	count_cmd = handle_inout_fd(mini->cmd);
+	printf("after inout\n");
 	fd = NULL;
 	fd = create_pipes(mini, count_cmd);
 	// if (fd != NULL && expand_variables(mini) == 0) //to write expand_variables later
+		printf("%d\n", count_cmd);
 		initiate_execute(mini, fd, count_cmd);
+		printf("%d\n", count_cmd);
 	ft_terminate_execute(mini);
 }
 

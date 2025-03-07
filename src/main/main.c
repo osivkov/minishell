@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/07 16:40:49 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/07 19:37:59 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,11 @@ int	run_minishell(t_minishell *shell)
 		// Expand environment variables in all command arguments
 		expand_command_variables(shell, cmd);
 		// Here, you can call your (currently simplified) execute function
+		shell->cmd = cmd;
+		if (shell->cmd == NULL)
+			printf("shell-cmd is NULL\n");
 		execute(shell);
+		
 		// Free tokens, command list, and input after execution
 		free_tokens(tokens);
 		free_cmd(cmd);
