@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 14:43:03 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/08 17:03:52 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,13 +36,13 @@ t_token *lexer(t_minishell *shell, char *input)
         // Если дошли до конца строки, выходим из цикла
         if (!*input)
             break;
-
-        // Определяем, что за токен нужно создавать
-        if (*input == '\'' || *input == '\"')
-        {
-            // Предположим, что process_quotes теперь принимает shell,
-            // чтобы при ошибке самой выставить last_exit
-            new_token = process_quotes(shell, &input, *input);
+	// Определяем, что за токен нужно создавать
+		if (*input == '\'' || *input == '\"')
+		{
+		// Предположим, что process_quotes теперь принимает shell,
+		// чтобы при ошибке самой выставить last_exit
+		new_token = process_quotes(shell, &input, *input);
+		// printf("Token: '%s', quote type: %d\n", new_token->value, new_token->quote_type);
         }
         else if (*input == '|' || *input == '<' || *input == '>')
         {

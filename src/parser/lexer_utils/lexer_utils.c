@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 10:50:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 14:41:39 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/08 16:55:40 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,11 @@ t_token	*create_word_token(char **input)
 	while (**input && !ft_isspace(**input) && **input != '|'
 		&& **input != '<' && **input != '>')
 	{
+		if (**input == '\'' || **input == '\"')
+		{
+			ft_putendl_fd("Minishell: syntax error: stray quote",2);
+			return (NULL);
+		}
 		len++;
 		(*input)++;
 	}
@@ -116,3 +121,24 @@ t_token	*create_word_token(char **input)
 	token->type = T_WORD;
 	return (token);
 }
+
+// char	*create_word_token(char **input)
+// {
+// 	char	*start;
+// 	int		len;
+
+// 	start = *input;
+// 	len = 0;
+// 	while (**input && !ft_isspace(**input) && **input != '|'
+// 		&& **input != '<' && **input != '>')
+// 	{
+// 		if (**input == '\'' || **input == '\"')
+// 		{
+// 			ft_putendl_fd("Minishell: syntax error: stray quote",2);
+// 			return (NULL);
+// 		}
+// 		len++;
+// 		(*input);
+// 	}
+// 	return (ft_substr(start, 0, len));
+// }

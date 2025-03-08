@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 14:50:09 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 16:51:15 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/08 16:47:37 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,27 +109,47 @@ static char	*expand_variables(t_minishell *shell, char *str)
 // Function to expand variables for each argument of every command in the command list.
 void	expand_command_variables(t_minishell *shell, t_cmd *cmd_list)
 {
-	t_cmd	*cmd;
 	int		i;
 	char	*expanded;
+	char	*tmp;
 
-	cmd = cmd_list;
-	while (cmd)
+	while (cmd_list)
 	{
-		if (cmd->args)
+		if (cmd_list->args)
 		{
 			i = 0;
-			while (cmd->args[i])
+			while (cmd_list->args[i])
 			{
-				expanded = expand_variables(shell, cmd->args[i]);
-				if (expanded)
+				if ((unsigned char)cmd_list->args[i][0] == 0x01)
 				{
-					free(cmd->args[i]);
-					cmd->args[i] = expanded;
+					tmp = ft_strdup(cmd_list->args[i] + 1);
+					free(cmd_list->args[i]);
+					cmd_list->args[i] = tmp;
+				}
+				else if ((unsigned char)cmd_list->args[i][0] == 0x02)
+				{
+					tmp = ft_strdup(cmd_list->args[i] + 1);
+					free(cmd_list->args[i]);
+					cmd_list->args[i] = tmp;
+					expanded = expand_variables(shell, cmd_list->args[i]);
+					if (expanded)
+					{
+						free(cmd_list->args[i]);
+						cmd_list->args[i] = expanded;
+					}
+				}
+				else
+				{
+					expanded = expand_variables(shell, cmd_list->args[i]);
+					if (expanded)
+					{
+						free(cmd_list->args[i]);
+						cmd_list->args[i] = expanded;
+					}
 				}
 				i++;
 			}
 		}
-		cmd = cmd->next;
+		cmd_list = cmd_list->next;
 	}
 }

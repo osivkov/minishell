@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 13:07:40 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/08 17:08:23 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void print_cmds(t_cmd *cmd)
 		cmd = cmd->next;
 		i++;
 		}
-	printf("================");
+	printf("================\n");
 }
 
 int	run_minishell(t_minishell *shell)

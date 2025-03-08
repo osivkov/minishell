@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 13:12:17 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/08 16:47:52 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#define SINGLE_QUOTE_MARKER "\x01"
+#define DOUBLE_QUOTE_MARKER "\x02"
 
 static void	free_args_on_error(char **args, int used)
 {
@@ -123,6 +125,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	int		arg_count;
 	char	**args;
 	int		i;
+	char	*copy;
 
 	cmd = alloc_cmd_struct(shell);
 	if (!cmd)
@@ -139,6 +142,17 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	{
 		if ((*tokens)->type == T_WORD)
 		{
+			if ((*tokens)->quote_type == SINGLE_QUOTE)
+				copy = ft_strjoin(SINGLE_QUOTE_MARKER, (*tokens)->value);
+			else if ((*tokens)->quote_type == DOUBLE_QUOTE)
+				copy = ft_strjoin(DOUBLE_QUOTE_MARKER, (*tokens)->value);
+			else
+				copy = ft_strdup((*tokens)->value);
+			if (!copy)
+			{
+				free_args_on_error(args, i);
+				return (free(cmd), shell->last_exit = 2, NULL);
+			}
 			args[i] = ft_strdup((*tokens)->value);
 			i++;
 			*tokens = (*tokens)->next;

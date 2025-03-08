@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/07 14:53:02 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/08 16:17:16 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,12 @@ typedef enum	e_token_type {
 	T_HEREDOC		// Symbol <<
 } t_token_type;
 
+typedef	enum e_quote_type {
+	NO_QUOTE,
+	SINGLE_QUOTE,
+	DOUBLE_QUOTE
+}	t_quote_type;
+
 typedef enum	e_parse_err {
 	PARSE_OK,
 	PARSE_HEREDOC_ERROR,
@@ -56,6 +62,7 @@ typedef enum	e_parse_err {
 typedef struct s_token {
 	char			*value; // Token value (command, argument, operator)
 	int				type;   // Token type (e.g., COMMAND, ARGUMENT, PIPE, REDIRECT)
+	t_quote_type	quote_type;
 	struct s_token	*next;  // Pointer to the next token in the list
 } t_token;
 
