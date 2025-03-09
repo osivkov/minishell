@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 16:17:16 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/09 15:12:11 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 #ifndef PATH_MAX
 #define PATH_MAX 4096 
 #endif
+#define SINGLE_QUOTE_MARKER "\x01"
+#define DOUBLE_QUOTE_MARKER "\x02"
 
 
 
@@ -127,6 +129,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len); */
 
 int		ft_malloc_error(t_minishell *mini);
 void	execute(t_minishell *mini);
+void	pseudo_execute(t_minishell *mini);
 void	expand_command_variables(t_minishell *shell, t_cmd *cmd_list);
 char	*get_env_value(t_minishell *shell, const char *var);
 /* Function prototypes for parsing */

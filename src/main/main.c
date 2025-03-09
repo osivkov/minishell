@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 17:08:23 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/09 15:44:00 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,44 +57,44 @@ char	*generate_prompt(t_minishell *shell)
 	return (prompt);
 }
 
-void debug_print_tokens(t_token *tokens)
-{
-	printf("=======Tokens============\n");
-	while(tokens)
-	{
-		printf("Tipe token: %d, value: '%s'\n",tokens->type, tokens->value ? tokens->value : "NULL");
-		tokens = tokens->next;
-	}
-	printf("======================\n");
-}
+// void debug_print_tokens(t_token *tokens)
+// {
+// 	printf("=======Tokens============\n");
+// 	while(tokens)
+// 	{
+// 		printf("Tipe token: %d, value: '%s'\n",tokens->type, tokens->value ? tokens->value : "NULL");
+// 		tokens = tokens->next;
+// 	}
+// 	printf("======================\n");
+// }
 
-void print_cmds(t_cmd *cmd)
-{
-	int i = 0;
+// void print_cmds(t_cmd *cmd)
+// {
+// 	int i = 0;
 
-	printf("=====List Comands=====\n");
-		while (cmd)
-		{
-			printf("Commans #%d:\n",i);
-			if (cmd->args)
-			{
-				int j = 0;
-				while (cmd->args[j])
-				{
-					printf("ARGUMENS %d: '%s'\n",j, cmd->args[j]);
-					j++;
-				}
-			}
-			else
-			{
-				printf(" NO arguments !\n");
-			}
-		printf( "infile: %d, outfile: %d\n", cmd->infile,cmd->outfile);
-		cmd = cmd->next;
-		i++;
-		}
-	printf("================\n");
-}
+// 	printf("=====List Comands=====\n");
+// 		while (cmd)
+// 		{
+// 			printf("Commans #%d:\n",i);
+// 			if (cmd->args)
+// 			{
+// 				int j = 0;
+// 				while (cmd->args[j])
+// 				{
+// 					printf("ARGUMENS %d: '%s'\n",j, cmd->args[j]);
+// 					j++;
+// 				}
+// 			}
+// 			else
+// 			{
+// 				printf(" NO arguments !\n");
+// 			}
+// 		printf( "infile: %d, outfile: %d\n", cmd->infile,cmd->outfile);
+// 		cmd = cmd->next;
+// 		i++;
+// 		}
+// 	printf("================\n");
+// }
 
 int	run_minishell(t_minishell *shell)
 {
@@ -109,7 +109,7 @@ int	run_minishell(t_minishell *shell)
 		prompt = generate_prompt(shell);
 		// Read input from the user using the generated prompt
 		input = readline(prompt);
-		// free(prompt);
+		free(prompt);
 		if (!input)
 		{
 			// If readline returns NULL, it indicates EOF (e.g., Ctrl+D)
@@ -121,7 +121,7 @@ int	run_minishell(t_minishell *shell)
 			add_history(input);
 		// LEXER: Convert the input string into a list of tokens
 		tokens = lexer(shell, input);
-		debug_print_tokens(tokens);
+		// debug_print_tokens(tokens);
 		
 		// If a lexer error occurs (e.g., unmatched quotes),
 		// shell->last_exit is set to 2 and tokens is NULL
@@ -132,7 +132,7 @@ int	run_minishell(t_minishell *shell)
 		}
 		// PARSER: Build a command list (t_cmd) from the token list
 		cmd = parser(shell, tokens);
-		print_cmds(cmd);
+		// print_cmds(cmd);
 		// If a parser error occurs, free tokens and input, then prompt again
 		if (!cmd && shell->last_exit == 2)
 		{
@@ -146,12 +146,14 @@ int	run_minishell(t_minishell *shell)
 		shell->cmd = cmd;
 		if (shell->cmd == NULL)
 			printf("shell-cmd is NULL\n");
+		// pseudo_execute(shell);
 		execute(shell);
 		
 		// Free tokens, command list, and input after execution
 		free_tokens(tokens);
 		free_cmd(cmd);
 		free(input);
+		// free(prompt);
 	}
 	return (0);
 }

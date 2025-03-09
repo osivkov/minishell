@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 16:47:52 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/09 10:48:50 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#define SINGLE_QUOTE_MARKER "\x01"
-#define DOUBLE_QUOTE_MARKER "\x02"
+
 
 static void	free_args_on_error(char **args, int used)
 {

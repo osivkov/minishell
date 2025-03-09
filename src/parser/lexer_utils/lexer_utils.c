@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 10:50:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 16:55:40 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/09 10:44:15 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ t_token	*create_word_token(char **input)
 	{
 		if (**input == '\'' || **input == '\"')
 		{
-			ft_putendl_fd("Minishell: syntax error: stray quote",2);
+			ft_putendl_fd("minishell: syntax error: missing closing quote",2);
 			return (NULL);
 		}
 		len++;

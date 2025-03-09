@@ -1,14 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   execute.c                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/03 09:52:30 by marvin            #+#    #+#             */
-/*   Updated: 2025/03/07 19:33:34 by osivkov          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+
 
 
 /*suggestions to be implemented later
@@ -215,7 +205,7 @@ char	*get_final_path(t_minishell *mini, char **all_path, char *path)
 		full_path = ft_strjoin(all_path[i], path);
 		if (full_path == NULL)
 			return (ml_ft_free(all_path, path), mini->last_exit = errno, perror("malloc"), NULL);
-		if (access(full_path, F_OK | X_OK) == 0)
+		if (access(full_path, F_OK || X_OK) == 0)
 			return (ml_ft_free(all_path, path), full_path);
 		i++;
 	}
@@ -252,29 +242,56 @@ int	ft_system_cmd(t_minishell *mini, t_cmd *current_cmd)
 	char	*path;
 
 	path = get_cmd_path(mini, current_cmd->args[0]);
-	printf("path: %s\n", path);
-	if (!path)
+	printf("path: %s\n", path ? path : "(null)");
+	if (path == NULL)
 	{
-		if (mini->last_exit == 127)
-		{
-			ft_putstr_fd("command not found\n", STDERR_FILENO);
-		}
-		else
-			return (1);
+		ft_putstr_fd("command not found\n", STDERR_FILENO);
+		_exit(127);  // немедленно завершаем дочерний процесс
 	}
 	if (execve(path, current_cmd->args, mini->env) == -1)
 	{
 		printf("check execve\n");
 		mini->last_exit = errno;
-		free (path);
+		free(path);
 		path = NULL;
 		ft_error_msg(current_cmd->args[0], NULL, strerror(errno));
+		_exit(mini->last_exit);
 	}
-	free (path);
+	free(path);
 	path = NULL;
 	return (0);
-	//write the code to execute and check on the error message calls.
 }
+
+
+// int	ft_system_cmd(t_minishell *mini, t_cmd *current_cmd)
+// {
+// 	char	*path;
+
+// 	path = get_cmd_path(mini, current_cmd->args[0]);
+// 	printf("path: %s\n", path);
+// 	if (!path)
+// 	{
+// 		if (mini->last_exit == 127)
+// 		{
+// 			ft_putstr_fd("command not found\n", STDERR_FILENO);
+// 		}
+// 		else
+// 			return (1);
+// 	}
+// 	if (execve(path, current_cmd->args, mini->env) == -1)
+// 	{
+// 		printf("check execve\n");
+// 		mini->last_exit = errno;
+// 		free (path);
+// 		path = NULL;
+// 		ft_error_msg(current_cmd->args[0], NULL, strerror(errno));
+// 		exit(mini->last_exit);
+// 	}
+// 	free (path);
+// 	// path = NULL;
+// 	return (0);
+// 	//write the code to execute and check on the error message calls.
+// }
 /*End of ft_system_cmd.c*/
 
 /*Start of all inbuilt cmds which will be saved as ft_cmd_name.c*/
@@ -375,7 +392,7 @@ int	ft_env(t_minishell *mini, t_cmd *current_cmd)
 	i = 0;
 	while (mini->env[i] != NULL)
 	{
-		ft_putendl_fd(mini->env[i], STDIN_FILENO);
+		ft_putendl_fd(mini->env[i], STDOUT_FILENO);
 		i++;
 	}
 	mini->last_exit = 0;
@@ -399,7 +416,7 @@ int	ft_pwd(t_minishell *mini, t_cmd *current_cmd)
 	pwd = ft_get_env_var(mini, "PATH");
 	if (pwd == NULL)
 		return (ft_malloc_error(mini));
-	ft_putendl_fd(pwd, STDIN_FILENO);
+	ft_putendl_fd(pwd, STDOUT_FILENO);
 	free (pwd);
 	mini->last_exit = 0;
 	return (0);
@@ -661,14 +678,14 @@ int	ft_exit(t_minishell *mini, t_cmd *current_cmd)
 //will return 1 on critical failure. Will return 0 otherwise.
 int	begin_exec_cmd(t_minishell *mini, t_cmd *current_cmd)
 {
-	int i = 0;
+	// int i = 0;
 
-	printf("Debug: Begining execution part %s\n", current_cmd->args[i]);
-	while (current_cmd->args[i])
-	{
-		printf("Debug:args[%d] = '%s'\n", i , current_cmd->args[i]);
-		i++;
-	}
+	// printf("Debug: Begining execution part %s\n", current_cmd->args[i]);
+	// while (current_cmd->args[i])
+	// {
+	// 	printf("Debug:args[%d] = '%s'\n", i , current_cmd->args[i]);
+	// 	i++;
+	// }
 	if (ft_strncmp(current_cmd->args[0], "cd", 3) == 0)
 		return (ft_cd(mini, current_cmd));
 	else if (ft_strncmp(current_cmd->args[0], "echo", 5) == 0)
@@ -687,7 +704,23 @@ int	begin_exec_cmd(t_minishell *mini, t_cmd *current_cmd)
 		return (ft_system_cmd(mini, current_cmd));
 }
 
-void	initiate_execute(t_minishell *mini, int *fd, int count_cmd) //fn length too long, to shorten it
+int	is_builtin_command(t_cmd *cmd)
+{
+	if (!cmd->args || !cmd->args[0])
+		return (0);
+	if (!ft_strncmp(cmd->args[0], "cd", 3)
+		|| !ft_strncmp(cmd->args[0], "echo", 5)
+		|| !ft_strncmp(cmd->args[0], "env", 4)
+		|| !ft_strncmp(cmd->args[0], "export", 7)
+		|| !ft_strncmp(cmd->args[0], "pwd", 4)
+		|| !ft_strncmp(cmd->args[0], "unset", 6)
+		|| !ft_strncmp(cmd->args[0], "exit", 5))
+		return (1);
+	return (0);
+}
+
+
+void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
 {
 	int		i;
 	int		j;
@@ -695,42 +728,121 @@ void	initiate_execute(t_minishell *mini, int *fd, int count_cmd) //fn length too
 	pid_t	pid;
 
 	head = mini->cmd;
+	/* Если это одиночная встроенная команда без перенаправлений,
+	   выполняем её напрямую в родительском процессе */
+	if (count_cmd == 1 && is_builtin_command(head) &&
+		head->infile == STDIN_FILENO && head->outfile == STDOUT_FILENO)
+	{
+		begin_exec_cmd(mini, head);
+		return;
+	}
 	i = 0;
-	j = 0;
 	while (head != NULL)
 	{
-		//check on fork. I am forking one extra
-		if (head->next != NULL)
-			pid = fork();
-		if (head->next != NULL && pid == -1)
+		pid = fork();
+		if (pid < 0)
 		{
 			perror("fork");
-			return ;
-		}
-		if (head->next == NULL || pid == 0)
-		{
-			if (head->next != NULL) //check if there is a next cmd
-				dup2(fd[i + 1], head->outfile);
-			if (i != 0) //check if there is a prev cmd
-				dup2(fd[i - 2], head->infile); //need to check if this works with the same infile or the prev infile
-			j = -1;
-			while (++j < 2 * (count_cmd - 1))
+			j = 0;
+			while (j < 2 * (count_cmd - 1))
+			{
 				close(fd[j]);
-			if (begin_exec_cmd(mini, head) == 1) //in case of a critical error exit
-				return ; //to modify depending on what to close and to wait for child processes
+				j++;
+			}
+			return;
 		}
-		i = i + 2;
+		if (pid == 0)
+		{
+			/* Если существует следующая команда, перенаправляем вывод */
+			if (head->next != NULL)
+			{
+				if (dup2(fd[i + 1], head->outfile))
+				{
+					perror("dup2 (stdout)");
+					exit(1);
+				}
+			}
+			/* Если это не первая команда, перенаправляем ввод */
+			if (i != 0)
+			{
+				if (dup2(fd[i - 2], head->infile))
+				{
+					perror("dup2 (stdin)");
+					exit(1);
+				}
+			}
+			j = 0;
+			while (j < 2 * (count_cmd - 1))
+			{
+				close(fd[j]);
+				j++;
+			}
+			if (begin_exec_cmd(mini, head) == 1)
+				exit(1);
+			exit(mini->last_exit);
+		}
+		i += 2;
 		head = head->next;
 	}
-	j = -1;
-	// closing all parent fds
-	while (++j < (2 * (count_cmd - 1)))
+	j = 0;
+	while (j < 2 * (count_cmd - 1))
+	{
 		close(fd[j]);
-	j = -1;
-	// waiting for child process to end
-	while (++j < count_cmd)
+		j++;
+	}
+	j = 0;
+	while (j < count_cmd)
+	{
 		wait(NULL);
+		j++;
+	}
 }
+
+
+// void	initiate_execute(t_minishell *mini, int *fd, int count_cmd) //fn length too long, to shorten it
+// {
+// 	int		i;
+// 	int		j;
+// 	t_cmd	*head;
+// 	pid_t	pid;
+
+// 	head = mini->cmd;
+// 	i = 0;
+// 	j = 0;
+// 	while (head != NULL)
+// 	{
+// 		//check on fork. I am forking one extra
+// 		if (head->next != NULL)
+// 			pid = fork();
+// 		if (head->next != NULL && pid == -1)
+// 		{
+// 			perror("fork");
+// 			return ;
+// 		}
+// 		if (head->next == NULL || pid == 0)
+// 		{
+// 			if (head->next != NULL) //check if there is a next cmd
+// 				dup2(fd[i + 1], head->outfile);
+// 			if (i != 0) //check if there is a prev cmd
+// 				dup2(fd[i - 2], head->infile); //need to check if this works with the same infile or the prev infile
+// 			j = -1;
+// 			while (++j < 2 * (count_cmd - 1))
+// 				close(fd[j]);
+// 			if (begin_exec_cmd(mini, head) == 1) //in case of a critical error exit
+// 				return ; //to modify depending on what to close and to wait for child processes
+// 		}
+// 		i = i + 2;
+// 		head = head->next;
+// 	}
+// 	j = -1;
+// 	// closing all parent fds
+// 	while (++j < (2 * (count_cmd - 1)))
+// 		close(fd[j]);
+// 	j = -1;
+// 	// waiting for child process to end
+// 	while (++j < count_cmd)
+// 		wait(NULL);
+// }
 /*End of initiate_execute.c*/
 
 /*start of expand_variables.c*/
@@ -748,35 +860,35 @@ int	expand_variables(t_minishell *mini)
 
 int	*create_pipes(t_minishell *mini, int count_cmd)
 {
-	int		*fd = NULL;
-	int		i;
-	t_cmd	*head;
+	int	*fd;
+	int	i;
+	int	j;
 
-	i = 0;
-	head = mini->cmd;
 	if (count_cmd <= 1)
-	{
-		return NULL;
-	}
+		return (NULL);
 	fd = ft_calloc(2 * (count_cmd - 1), sizeof(int));
-	if (fd == NULL)
+	if (!fd)
 	{
-		mini->last_exit = 12;
-		return (perror("malloc"), NULL);
+		mini->last_exit = ENOMEM;
+		perror("malloc");
+		return (NULL);
 	}
+	i = 0;
 	while (i < count_cmd - 1)
 	{
 		if (pipe(fd + (i * 2)) < 0)
 		{
 			mini->last_exit = errno;
-			return (perror("pipe"), NULL);
-			while(--i >= 0)
+			perror("pipe");
+			j = 0;
+			while (j < i)
 			{
-				close(fd[2*i]);
-				close(fd[2*i + 1]);
+				close(fd[j * 2]);
+				close(fd[j * 2 + 1]);
+				j++;
 			}
 			free(fd);
-			return NULL;
+			return (NULL);
 		}
 		i++;
 	}
@@ -799,7 +911,6 @@ int	handle_inout_fd(t_cmd *head)
 	}
 	return (count_cmd);
 }
-
 void	ft_terminate_execute(t_minishell *mini)
 {
 	t_cmd	*head;
@@ -832,6 +943,7 @@ void	ft_terminate_execute(t_minishell *mini)
 	// free (mini);
 }
 
+
 void	execute(t_minishell *mini)
 {
 	int		*fd;
@@ -843,7 +955,6 @@ void	execute(t_minishell *mini)
 	i = 0;
 	j = 0;
 	head = mini->cmd;
-	printf("before  inout\n");
 	if (mini->cmd == NULL)
 	{
 		printf("cmd is NULL\n");
@@ -860,14 +971,10 @@ void	execute(t_minishell *mini)
 		head = head->next;
 	}
 	count_cmd = handle_inout_fd(mini->cmd);
-	printf("after inout\n");
 	fd = NULL;
 	fd = create_pipes(mini, count_cmd);
-	// if (fd != NULL && expand_variables(mini) == 0) //to write expand_variables later
-		printf("%d\n", count_cmd);
-		initiate_execute(mini, fd, count_cmd);
-		printf("%d\n", count_cmd);
-	ft_terminate_execute(mini);
+	// if (fd != NULL && expand_variables(mini) == 0) //to write expand_variables late
+	initiate_execute(mini, fd, count_cmd);
 }
 
 /*end of execute.c*/

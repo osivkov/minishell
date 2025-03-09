@@ -25,6 +25,8 @@ SRCS = $(SRC_DIR)/main/main.c \
 		$(SRC_DIR)/parser/type/heredoc.c \
 		$(SRC_DIR)/signals/signals.c \
 		$(SRC_DIR)/executor/execute.c \
+		#$(SRC_DIR)/executor/pseudo.c \
+		# $(SRC_DIR)/executor/execute.c \
 		# $(SRC_DIR)/executor/builtins.c \
 		# $(SRC_DIR)/executor/pipes.c \
 		# $(SRC_DIR)/executor/redirects.c \

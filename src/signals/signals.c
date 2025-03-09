@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/26 17:53:37 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 14:42:48 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/09 12:32:27 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	handle_sigint(int sig)
 {
 	(void)sig;
 
-	g_signal_status = 1;
+	g_signal_status = sig;
 	write(1, "\n", 1);
 	rl_replace_line("", 0);
 	rl_on_new_line();
