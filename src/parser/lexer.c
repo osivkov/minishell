@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 17:03:52 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/10 18:10:57 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,15 @@ t_token *lexer(t_minishell *shell, char *input)
         if (!*input)
             break;
 	// Определяем, что за токен нужно создавать
-		if (*input == '\'' || *input == '\"')
-		{
-		// Предположим, что process_quotes теперь принимает shell,
-		// чтобы при ошибке самой выставить last_exit
-		new_token = process_quotes(shell, &input, *input);
+		// if (*input == '\'' || *input == '\"')
+		// {
+        //     if (*input == '\'')
+		// 		new_token->quote_type = 1;
+		// 	else
+		// 		new_token->quote_type = 2;
+		// new_token = process_quotes(shell, &input, *input);
 		// printf("Token: '%s', quote type: %d\n", new_token->value, new_token->quote_type);
-        }
+        // }
         else if (*input == '|' || *input == '<' || *input == '>')
         {
             // create_special_token(&input);
@@ -52,9 +54,8 @@ t_token *lexer(t_minishell *shell, char *input)
         else
         {
             // Обычное слово
-            new_token = create_word_token(&input);
+            new_token = create_word_token(shell, &input);
         }
-
         // Если создание токена вернуло NULL, значит произошла ошибка 
         // (например, unmatched quotes, проблемы с malloc, и т.д.)
         if (!new_token)
@@ -66,16 +67,12 @@ t_token *lexer(t_minishell *shell, char *input)
                 shell->last_exit = 2;
                 fprintf(stderr, "minishell: lexer error\n");
             }
-
-            // Освобождаем список уже созданных токенов
-            free_tokens(head);
-            return NULL;
+			free_tokens(head);
+			return NULL;
         }
-
-        // Добавляем новый токен в конец списка
-        token_to_list(&head, &current, new_token);
-    }
-    return head;
+	token_to_list(&head, &current, new_token);
+	}
+	return head;
 }
 
 

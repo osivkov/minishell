@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/09 10:48:50 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/10 18:09:19 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	int		arg_count;
 	char	**args;
 	int		i;
-	char	*copy;
+	int		*i_qtype;
 
 	cmd = alloc_cmd_struct(shell);
 	if (!cmd)
@@ -135,23 +135,25 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	args = malloc(sizeof(char *) * (arg_count + 1));
 	if (!args)
 		return (free(cmd), shell->last_exit = 2, NULL);
+	i_qtype = malloc(sizeof(int) * arg_count);
+		if (!arg_count || !i_qtype)
+		{
+			if (args)
+			{
+				free(args);
+			}
+			else if (i_qtype)
+				free(i_qtype);
+			free(cmd);
+			shell->last_exit = 10;
+			return (NULL);
+		}
 	i = 0;
 	/* Обрабатываем все токены до T_PIPE */
 	while (*tokens && (*tokens)->type != T_PIPE)
 	{
 		if ((*tokens)->type == T_WORD)
 		{
-			if ((*tokens)->quote_type == SINGLE_QUOTE)
-				copy = ft_strjoin(SINGLE_QUOTE_MARKER, (*tokens)->value);
-			else if ((*tokens)->quote_type == DOUBLE_QUOTE)
-				copy = ft_strjoin(DOUBLE_QUOTE_MARKER, (*tokens)->value);
-			else
-				copy = ft_strdup((*tokens)->value);
-			if (!copy)
-			{
-				free_args_on_error(args, i);
-				return (free(cmd), shell->last_exit = 2, NULL);
-			}
 			args[i] = ft_strdup((*tokens)->value);
 			i++;
 			*tokens = (*tokens)->next;
@@ -183,6 +185,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	}
 	args[i] = NULL;
 	cmd->args = args;
+	cmd->quote_type = i_qtype;
 	return (cmd);
 }
 

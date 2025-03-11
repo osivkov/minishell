@@ -1,4 +1,14 @@
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   execute.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/03 09:52:30 by marvin            #+#    #+#             */
+/*   Updated: 2025/03/11 13:56:29 by osivkov          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 
 /*suggestions to be implemented later
@@ -8,17 +18,287 @@ Error message: "malloc: cannot allocate memory"
 */
 
 #include "minishell.h"
+#include <signal.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
+#include <stdlib.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
+#include <linux/limits.h>
+#include <sys/wait.h>
 
+#include "minishell.h"
 
 /*Start of ft_env_utils.c*/
 
+
+
+/*end of execute.c*/
 void	ft_error_msg(char *command, char *key, char *error_msg);
 void	ft_terminate_execute(t_minishell *mini);
+char	*ft_get_env_var(t_minishell *mini, char *key);
+char	*ft_join_strs(char *s1, char *s2, char *s3, char *s4);
+
+int	ft_key_len(t_minishell *mini, char *key)
+{
+	int		i;
+
+	// printf("key_len fnc, key: %s\n", key);
+	i = 0;
+	if (mini == NULL)
+		return (0);
+	if (ft_isalpha(key[0]) == 0 && key[0] != '_')
+		return (0);
+	while (key[i] != '\0' && (ft_isalnum(key[i]) == 1 || key[i] == '_'))
+		i++;
+	// printf("key_len: %d\n", i);
+	return (i);
+}
+
+int	ft_value_len(t_minishell *mini, char *key)
+{
+	int		i;
+	int		keylen;
+	char	*k_key;
+	char	*value;
+
+	keylen = ft_key_len(mini, key);
+	k_key = (char *)ft_calloc(1, sizeof(char) * keylen + 1);
+	if (k_key == NULL)
+		return (-1);
+	i = 0;
+	while (i < keylen)
+	{
+		k_key[i] = key[i];
+		i++;
+	}
+	k_key[i] = '\0';
+	// printf("%s\n", k_key);
+	value = ft_get_env_var(mini, k_key); //check
+	if (value == NULL)
+		return (-1);
+	i = 0;
+	i = ft_strlen(value);
+	free (value);
+	free (k_key);
+	return (i);
+}
+
+int	ft_get_expand_len(t_minishell *mini, char *str, t_cmd *head)
+{
+	int		i;
+	int		len;
+	(void)head;
+
+	i = 0;
+	len = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\'')
+		{
+			i++;
+			while (str[i] != '\'' && str[i] != '\0')
+			{
+				i++;
+				len++;
+			}
+			if (str[i] == '\0')
+			{
+				return (-1);
+			}
+			i++;
+		}
+		else if (str[i] == '\"')
+		{
+			i++;
+			while (str[i] != '\"' && str[i] != '\0')
+			{
+				if (str[i] == '$')
+				{
+					i++;
+					i = i + ft_key_len(mini, &str[i]);
+					len = len + ft_value_len(mini, &str[i]);
+				}
+				else
+				{
+					i++;
+					len++;
+				}
+			}
+			if (str[i] == '\0')
+			{
+				return (-1);
+			}
+		}
+		else if (str[i] == '$')
+		{
+			i++;
+			i = i + ft_key_len(mini, &str[i]);
+			len = len + ft_value_len(mini, &str[i]);
+		}
+		else
+		{
+			i++;
+			len++;
+		}
+	}
+	return (len);
+}
+
+char	*ft_get_value_str(t_minishell *mini, char *key, int keylen)
+{
+	int		i;
+	char	*k_key;
+	char	*value;
+
+	k_key = (char *)malloc(sizeof(char) * keylen + 1);
+	if (k_key == NULL)
+		return (NULL);
+	i = 0;
+	while (i < keylen)
+	{
+		k_key[i] = key[i];
+		i++;
+	}
+	// printf("keylen: %d, key: %s, k_key: %s\n", keylen, key, k_key);
+	k_key[i] = '\0';
+	// printf("d1: %s\n", k_key);
+	value = ft_get_env_var(mini, k_key);
+	free (k_key);
+	return (value);
+}
+
+char	*ft_get_expand_str(t_minishell *mini, char *str, char *final, t_cmd *head)
+{
+	int		i;
+	int		j;
+	int		len;
+	char	*temp;
+	(void)head;
+
+	i = 0;
+	len = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\'')
+		{
+			i++;
+			while (str[i] != '\'' && str[i] != '\0')
+			{
+				final[len] = str[i];
+				i++;
+				j++;
+			}
+			if (str[i] == '\0')
+			{
+				return (NULL);
+			}
+			i++;
+		}
+		else if (str[i] == '\"')
+		{
+			i++;
+			while (str[i] != '\"' && str[i] != '\0')
+			{
+				if (str[i] == '$')
+				{
+					i++;
+					j = ft_key_len(mini, &str[i]);
+					temp = ft_get_value_str(mini, &str[i], j);
+					i = i + j;
+					j = 0;
+					while (temp[j] != '\0')
+					{
+						final[len] = temp[j];
+						len++;
+						j++;
+					}
+					free (temp);
+					temp = NULL;
+				}
+				else
+				{
+					final[len] = str[i];
+					i++;
+					len++;
+				}
+			}
+			if (str[i] == '\0')
+			{
+				return (NULL);
+			}
+		}
+		else if (str[i] == '$')
+		{
+			i++;
+			j = ft_key_len(mini, &str[i]);
+			temp = ft_get_value_str(mini, &str[i], j);
+			i = i + j;
+			j = 0;
+			while (temp[j] != '\0')
+			{
+				final[len] = temp[j];
+				len++;
+				j++;
+			}
+			free (temp);
+			temp = NULL;
+		}
+		else
+		{
+			final[len] = str[i];
+			i++;
+			len++;
+		}
+	}
+	return (final);
+}
+
+char	*ft_expand_str(t_minishell *mini, char *str, t_cmd *head)
+{
+	// int		i;
+	// int		j;
+	int		len;
+	char	*final;
+
+	len = ft_get_expand_len(mini, str, head);
+	final = (char *)malloc(sizeof(char) * len + 1);
+	if (final == NULL)
+		return (NULL);
+	final = ft_get_expand_str(mini, str, final, head);
+	// printf ("ft_expand_str, final: %s\n", final);
+	if (final == NULL)
+		return (NULL);
+	return (final);
+}
+
+int	ft_expand_all(t_minishell *mini)
+{
+	t_cmd	*head;
+	int		i;
+	int		j;
+	char	*final;
+
+	j = 0;
+	head = mini->cmd;
+	while (head != NULL)
+	{
+		i = 0;
+		while (head->args[i] != NULL)
+		{
+			if (head->quote_type[i] != 1)
+			{
+				final = ft_expand_str(mini, head->args[i], head);
+				free (head->args[i]);
+				head->args[i] = final;
+			}
+			i++;
+		}
+		head = head->next;
+	}
+	return (0);
+}
 
 int	ft_malloc_error(t_minishell *mini)
 {
@@ -27,7 +307,7 @@ int	ft_malloc_error(t_minishell *mini)
 	return (1);
 }
 
-void	ml_ft_free(char **s1, char *s2)
+void	ft_free_ex(char **s1, char *s2)
 {
 	int		i;
 
@@ -119,7 +399,6 @@ int	ft_set_env_var(t_minishell *mini, char *key, char *ans) //will return 0 on s
 	if (temp == NULL)
 		return (ft_malloc_error(mini));
 	temp2 = ft_strjoin(temp, ans);
-	free (temp);
 	if (temp2 == NULL)
 		return (ft_malloc_error(mini));
 	i = 0;
@@ -130,10 +409,13 @@ int	ft_set_env_var(t_minishell *mini, char *key, char *ans) //will return 0 on s
 			break ;
 		i++;
 	}
+	// printf("set_env_debug\ntemp: %s\ntemp2: %s\n, mini->env: %s\n", temp, temp2, mini->env[i]);
 	if (mini->env[i] != NULL)
 	{
 		free (mini->env[i]);
+		mini->env[i] = NULL;
 		mini->env[i] = temp2;
+		// printf("check in set func: %s\n", mini->env[i]);
 		return (0);
 	}
 	mini->env = ft_realloc_env(mini->env);
@@ -141,6 +423,7 @@ int	ft_set_env_var(t_minishell *mini, char *key, char *ans) //will return 0 on s
 		return (free (temp2), ft_malloc_error(mini));
 	mini->env[i] = temp2;
 	mini->env[i + 1] = NULL;
+	free (temp);
 	return (0);
 }
 
@@ -204,9 +487,9 @@ char	*get_final_path(t_minishell *mini, char **all_path, char *path)
 	{
 		full_path = ft_strjoin(all_path[i], path);
 		if (full_path == NULL)
-			return (ml_ft_free(all_path, path), mini->last_exit = errno, perror("malloc"), NULL);
-		if (access(full_path, F_OK || X_OK) == 0)
-			return (ml_ft_free(all_path, path), full_path);
+			return (ft_free_ex(all_path, path), mini->last_exit = errno, perror("malloc"), NULL);
+		if (access(full_path, F_OK | X_OK) == 0)
+			return (ft_free_ex(all_path, path), full_path);
 		i++;
 	}
 	mini->last_exit = 127; //cmd not found
@@ -233,7 +516,7 @@ char	*get_cmd_path(t_minishell *mini, char const *to_find)
 	temp = NULL;
 	path = ft_strjoin("/", to_find);
 	if (path == NULL)
-		return (ml_ft_free(all_path, NULL), mini->last_exit = errno, perror("malloc"), NULL);
+		return (ft_free_ex(all_path, NULL), mini->last_exit = errno, perror("malloc"), NULL);
 	return (get_final_path(mini, all_path, path));
 }
 
@@ -242,56 +525,34 @@ int	ft_system_cmd(t_minishell *mini, t_cmd *current_cmd)
 	char	*path;
 
 	path = get_cmd_path(mini, current_cmd->args[0]);
-	printf("path: %s\n", path ? path : "(null)");
+	// printf("path: %s\n", path);
 	if (path == NULL)
 	{
-		ft_putstr_fd("command not found\n", STDERR_FILENO);
-		_exit(127);  // немедленно завершаем дочерний процесс
+		if (mini->last_exit == 127)
+		{
+			// printf("debug system_cmd cmd not found check\n");
+			ft_error_msg(current_cmd->args[0], NULL, strerror(127));
+			return (0);
+		}
+		else
+			return (1);
 	}
+	// printf("ft_system_cmd\npath: %s, args[0]: %s, args[1]: %s", path, current_cmd->args[0], current_cmd->args[1]);
 	if (execve(path, current_cmd->args, mini->env) == -1)
 	{
-		printf("check execve\n");
+		// printf("check execve\n");
 		mini->last_exit = errno;
-		free(path);
+		free (path);
 		path = NULL;
 		ft_error_msg(current_cmd->args[0], NULL, strerror(errno));
-		_exit(mini->last_exit);
 	}
-	free(path);
+	// printf("debug system_cmd\n");
+	free (path);
 	path = NULL;
+	exit (0);
 	return (0);
+	//write the code to execute and check on the error message calls.
 }
-
-
-// int	ft_system_cmd(t_minishell *mini, t_cmd *current_cmd)
-// {
-// 	char	*path;
-
-// 	path = get_cmd_path(mini, current_cmd->args[0]);
-// 	printf("path: %s\n", path);
-// 	if (!path)
-// 	{
-// 		if (mini->last_exit == 127)
-// 		{
-// 			ft_putstr_fd("command not found\n", STDERR_FILENO);
-// 		}
-// 		else
-// 			return (1);
-// 	}
-// 	if (execve(path, current_cmd->args, mini->env) == -1)
-// 	{
-// 		printf("check execve\n");
-// 		mini->last_exit = errno;
-// 		free (path);
-// 		path = NULL;
-// 		ft_error_msg(current_cmd->args[0], NULL, strerror(errno));
-// 		exit(mini->last_exit);
-// 	}
-// 	free (path);
-// 	// path = NULL;
-// 	return (0);
-// 	//write the code to execute and check on the error message calls.
-// }
 /*End of ft_system_cmd.c*/
 
 /*Start of all inbuilt cmds which will be saved as ft_cmd_name.c*/
@@ -338,6 +599,7 @@ int	ft_cd(t_minishell *mini, t_cmd *current_cmd)
 		return (1);
 	}
 	temp = ft_strdup(pwd);
+	// printf("temp: %s\n pwd: %s\n", temp, pwd);
 	if (temp == NULL)
 		return (ft_malloc_error(mini));
 	if (ft_set_env_var(mini, "PWD", temp) != 0)
@@ -345,6 +607,7 @@ int	ft_cd(t_minishell *mini, t_cmd *current_cmd)
 	//for debugging
 	// printf ("pwd =%s\n", ft_get_env_var(mini, "PWD")); //check for cd ~
 	// printf ("oldpwd =%s\n", ft_get_env_var(mini, "OLDPWD"));
+	// printf("check 2: temp: %s\n", ft_get_env_var(mini, "PWD"));
 	free (temp);
 	mini->last_exit = 0;
 	return (0);
@@ -413,10 +676,10 @@ int	ft_pwd(t_minishell *mini, t_cmd *current_cmd)
 		ft_error_msg(current_cmd->args[0], NULL, "too many arguments");
 		return (0);
 	}
-	pwd = ft_get_env_var(mini, "PATH");
+	pwd = ft_get_env_var(mini, "PWD");
 	if (pwd == NULL)
 		return (ft_malloc_error(mini));
-	ft_putendl_fd(pwd, STDOUT_FILENO);
+	ft_putendl_fd(pwd, STDIN_FILENO);
 	free (pwd);
 	mini->last_exit = 0;
 	return (0);
@@ -432,7 +695,7 @@ int	ft_check_env_name(char *name)
 		i++;
 	else
 		return (1);
-	while (name[i] != '\0' || name[i] != '=')
+	while (name[i] != '\0' && name[i] != '=')
 	{
 		if (ft_isalnum(name[i]) == 1 || name[i] == '_')
 			i++;
@@ -446,10 +709,11 @@ int	ft_get_value_len(char *str)
 {
 	int		i;
 	int		len;
-	int		value_len = 0;
+	int		value_len;
 
 	i = 0;
 	len = ft_strlen(str);
+	value_len = 0;
 	while (str[i] != '\0')
 	{
 		if (str[i] == '\'')
@@ -514,8 +778,8 @@ char	*ft_remove_quote_exec(char *str, int len)
 			i++;
 			while (str[i] != '\"')
 			{
-				if (str[i] == '$')
-					//call expand variable
+				// if (str[i] == '$')
+					
 				value[j] = str[i];
 				j++;
 				i++;
@@ -524,7 +788,7 @@ char	*ft_remove_quote_exec(char *str, int len)
 		}
 		else
 		{
-			if (str[i] == '$')
+			// if (str[i] == '$')
 				//call expand variable
 			value[j] = str[i];
 			j++;
@@ -537,34 +801,36 @@ char	*ft_remove_quote_exec(char *str, int len)
 
 int	ft_export_util(t_minishell *mini, char *full_str)
 {
-	size_t		i;
+	int		i;
 	int		value_len;
-	char	*new_full = NULL;
+	// char	*new_full;
 	char	*key;
 	char	*value;
 
 	i = 0;
 	while (full_str[i] != '\0' && full_str[i] != '=')
 		i++;
-	if (i == ft_strlen(full_str))
+	if (i == (int)ft_strlen(full_str))
 		return (0);
 	key = ft_substr(full_str, 0, i);
 	if (key == NULL)
 		return (1);
 	i++;
+	// printf("export check\n");
 	value_len = ft_get_value_len(&full_str[i]);
 	if (value_len == -1)
 		return (mini->last_exit = 1, free (key), ft_error_msg("export", NULL, "syntax error: unexpected end of file"), 1);
 	value = ft_remove_quote_exec(&full_str[i], value_len);
 	if (value == NULL)
 		return (free (key), 1);
+	// printf("main check\nkey: %s\nvalue: %s\n", key, value);
 	if (ft_set_env_var(mini, key, value) != 0)
 		i = 1;
 	else
 		i = 0;
 	free (key);
 	free (value);
-	free (new_full);
+	// free (new_full);
 	return (i);
 }
 
@@ -572,20 +838,23 @@ int	ft_export(t_minishell *mini, t_cmd *current_cmd)
 {
 	int		i;
 	int		export_error;
-	int		del_no_of_quotes;
-	(void)del_no_of_quotes;
+	// int		del_no_of_quotes;
 
 	i = 1;
 	export_error = 0;
+	// printf("ft_export begin\n");
 	while (current_cmd->args[i] != NULL)
 	{
+		// printf("debug: args: %s\n", current_cmd->args[i]);
 		if (ft_check_env_name(current_cmd->args[i]) == 1)
 		{
+			// printf("export debug 1\n");
 			export_error = 1;
 			ft_error_msg("export", current_cmd->args[i], "not a valid identifier");
 		}
 		else
 		{
+			// printf("ft_export else \n");
 			if (ft_export_util(mini, current_cmd->args[i]) == 1)
 				return (ft_malloc_error(mini));
 		}
@@ -599,12 +868,14 @@ int	ft_check_unset_name(char *name)
 {
 	int		i;
 
-	if (ft_isalpha(name[0]) || name[0] != '_')
+	i = 0;
+	if (ft_isalpha(name[0]) == 1 || name[0] == '_')
+		i++;
+	else
 		return (1);
-	i = 1;
 	while (name[i] != '\0')
 	{
-		if (ft_isalnum(name[i]) != 1 || name[i] != '_')
+		if (ft_isalnum(name[i]) != 1 && name[i] != '_')
 			return (1);
 		i++;
 	}
@@ -665,10 +936,13 @@ int	ft_unset(t_minishell *mini, t_cmd *current_cmd)
 
 int	ft_exit(t_minishell *mini, t_cmd *current_cmd)
 {
-	(void)current_cmd;
+	int		i;
+
+	if (current_cmd != NULL)
+		i = 0;
 	ft_terminate_execute(mini);
 	printf("exit\n");
-	exit(0);
+	exit (0);
 }
 
 /*End of all inbuilt cmds*/
@@ -678,14 +952,6 @@ int	ft_exit(t_minishell *mini, t_cmd *current_cmd)
 //will return 1 on critical failure. Will return 0 otherwise.
 int	begin_exec_cmd(t_minishell *mini, t_cmd *current_cmd)
 {
-	// int i = 0;
-
-	// printf("Debug: Begining execution part %s\n", current_cmd->args[i]);
-	// while (current_cmd->args[i])
-	// {
-	// 	printf("Debug:args[%d] = '%s'\n", i , current_cmd->args[i]);
-	// 	i++;
-	// }
 	if (ft_strncmp(current_cmd->args[0], "cd", 3) == 0)
 		return (ft_cd(mini, current_cmd));
 	else if (ft_strncmp(current_cmd->args[0], "echo", 5) == 0)
@@ -703,101 +969,6 @@ int	begin_exec_cmd(t_minishell *mini, t_cmd *current_cmd)
 	else
 		return (ft_system_cmd(mini, current_cmd));
 }
-
-int	is_builtin_command(t_cmd *cmd)
-{
-	if (!cmd->args || !cmd->args[0])
-		return (0);
-	if (!ft_strncmp(cmd->args[0], "cd", 3)
-		|| !ft_strncmp(cmd->args[0], "echo", 5)
-		|| !ft_strncmp(cmd->args[0], "env", 4)
-		|| !ft_strncmp(cmd->args[0], "export", 7)
-		|| !ft_strncmp(cmd->args[0], "pwd", 4)
-		|| !ft_strncmp(cmd->args[0], "unset", 6)
-		|| !ft_strncmp(cmd->args[0], "exit", 5))
-		return (1);
-	return (0);
-}
-
-
-void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
-{
-	int		i;
-	int		j;
-	t_cmd	*head;
-	pid_t	pid;
-
-	head = mini->cmd;
-	/* Если это одиночная встроенная команда без перенаправлений,
-	   выполняем её напрямую в родительском процессе */
-	if (count_cmd == 1 && is_builtin_command(head) &&
-		head->infile == STDIN_FILENO && head->outfile == STDOUT_FILENO)
-	{
-		begin_exec_cmd(mini, head);
-		return;
-	}
-	i = 0;
-	while (head != NULL)
-	{
-		pid = fork();
-		if (pid < 0)
-		{
-			perror("fork");
-			j = 0;
-			while (j < 2 * (count_cmd - 1))
-			{
-				close(fd[j]);
-				j++;
-			}
-			return;
-		}
-		if (pid == 0)
-		{
-			/* Если существует следующая команда, перенаправляем вывод */
-			if (head->next != NULL)
-			{
-				if (dup2(fd[i + 1], head->outfile))
-				{
-					perror("dup2 (stdout)");
-					exit(1);
-				}
-			}
-			/* Если это не первая команда, перенаправляем ввод */
-			if (i != 0)
-			{
-				if (dup2(fd[i - 2], head->infile))
-				{
-					perror("dup2 (stdin)");
-					exit(1);
-				}
-			}
-			j = 0;
-			while (j < 2 * (count_cmd - 1))
-			{
-				close(fd[j]);
-				j++;
-			}
-			if (begin_exec_cmd(mini, head) == 1)
-				exit(1);
-			exit(mini->last_exit);
-		}
-		i += 2;
-		head = head->next;
-	}
-	j = 0;
-	while (j < 2 * (count_cmd - 1))
-	{
-		close(fd[j]);
-		j++;
-	}
-	j = 0;
-	while (j < count_cmd)
-	{
-		wait(NULL);
-		j++;
-	}
-}
-
 
 // void	initiate_execute(t_minishell *mini, int *fd, int count_cmd) //fn length too long, to shorten it
 // {
@@ -828,8 +999,11 @@ void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
 // 			j = -1;
 // 			while (++j < 2 * (count_cmd - 1))
 // 				close(fd[j]);
-// 			if (begin_exec_cmd(mini, head) == 1) //in case of a critical error exit
+// 			if (begin_exec_cmd(mini, head) == 1)
+// 			{
+// 				printf("debug initiate_execute\n"); //in case of a critical error exit
 // 				return ; //to modify depending on what to close and to wait for child processes
+// 			}
 // 		}
 // 		i = i + 2;
 // 		head = head->next;
@@ -843,6 +1017,223 @@ void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
 // 	while (++j < count_cmd)
 // 		wait(NULL);
 // }
+
+char	*one_d_conversion(char	**env)
+{
+	int		i;
+	int		j;
+	int		k;
+	int		len;
+	char	*temp;
+
+	i = -1;
+	len = 0;
+	while (env[++i] != NULL)
+		len = len + ft_strlen(env[i]) + 1;
+	temp = (char *)ft_calloc(sizeof(char), (len + 1));
+	if (temp == NULL)
+		return (NULL);
+	i = -1;
+	k = -1;
+	while (env[++i] != NULL)
+	{
+		j = -1;
+		while (env[i][++j] != '\0')
+			temp[++k] = env[i][j];
+		temp[++k] = '\n';
+	}
+	temp[k] = '\0';
+	return (temp);
+}
+
+void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
+{
+	int		i;
+	int		j;
+	t_cmd	*head;
+	char	*path;
+	pid_t	pid;
+	char	*dup_env;
+	int		dup_env_len;
+	int		comm_fd[2];
+	char	*temp;
+
+	head = mini->cmd;
+	i = 0;
+	j = 0;
+	if (pipe(comm_fd) == -1)
+	{
+		perror("pipe");
+		exit(1);
+	}
+	/* Iterate through each cmd in the list. */
+	while (head != NULL)
+	{
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork");
+			return ;
+		}
+		if (pid == 0) /* Child procces */
+		{
+			close(comm_fd[0]); //closing read end in child
+			/* === INPUT HANDLING === / /
+
+			#If the command has an infile different from STDIN_FILENO,
+			#it means the user has specified input redirection using < or <<.
+			#In this case, replace the standard input with infile.
+			#Otherwise, if this is not the first command (i != 0), 
+			#read from the pipe. */
+			if (head->infile != STDIN_FILENO)
+			{
+				if (dup2(head->infile, STDIN_FILENO) == -1)
+				{
+					perror("dup2 (file-in)");
+					exit(1);
+				}
+				close(head->infile); 
+			}
+			else if (i != 0) 
+			{
+				if (dup2(fd[i - 2], STDIN_FILENO) == -1)
+				{
+					perror("dup2 (pipe-in)");
+					exit(1);
+				}
+			}
+
+			/* === OUTPUT HANDLING === / /
+			#Similarly for output: if outfile != STDOUT_FILENO,
+			#it means the user has specified redirection with > or >>;
+			#otherwise, if there is a next command (head->next != NULL),
+			#redirect the output to a pipe. */
+			if (head->outfile != STDOUT_FILENO)
+			{
+				if (dup2(head->outfile, STDOUT_FILENO) == -1)
+				{
+					perror("dup2 (file-out)");
+					exit(1);
+				}
+				close(head->outfile);
+			}
+			else if (head->next != NULL)
+			{
+				if (dup2(fd[i + 1], STDOUT_FILENO) == -1)
+				{
+					perror("dup2 (pipe-out)");
+					exit(1);
+				}
+			}
+
+			/* Close all pipes, as they are no longer needed in the child process. */
+			j = 0;
+			while (j < 2 * (count_cmd))
+			{
+				close(fd[j]);
+				j++;
+			}
+
+			/* Directly execute the command (or built-in). */
+			if (begin_exec_cmd(mini, head) == 1)
+				exit(1);
+			/*start of modification*/
+			dup_env = one_d_conversion(mini->env); //converting the env array to a single dimension
+			if (dup_env == NULL)
+				return ;
+			dup_env_len = ft_strlen(dup_env);
+			write(comm_fd[1], &dup_env_len, sizeof(int));
+			write(comm_fd[1], dup_env, dup_env_len + 1);
+			free (dup_env);
+			close(comm_fd[1]);
+			// printf("check\n");
+			exit(mini->last_exit);
+		}
+		i = i + 2;
+		head = head->next;
+	}
+	/*The parent process closes all pipes.*/
+	j = -1;
+	while (++j < (2 * (count_cmd)))
+		close(fd[j]);
+	/* And waits for all child processes to finish. */
+	j = -1;
+	while (++j < count_cmd)
+		wait(NULL);
+	close (comm_fd[1]);
+	dup_env_len = 0;
+	if (read(comm_fd[0], &dup_env_len, sizeof(int)) > 0)
+	{
+		temp = (char *)ft_calloc(sizeof(char), dup_env_len + 1);
+		if (temp == NULL)
+			return ;
+		if (read(comm_fd[0], temp, dup_env_len + 1) > 0)
+		{
+			i = -1;
+			while (mini->env[++i] != NULL)
+				free (mini->env[i]);
+			free (mini->env);
+			mini->env = ft_split(temp, '\n');
+			if (mini->env == NULL)
+				return ;
+			free (temp);
+		}
+		path = ft_get_env_var(mini, "PWD");
+		if (chdir(path) != 0)
+			return ;
+	}
+	close(comm_fd[0]);
+}
+
+
+
+// void	initiate_execute(t_minishell *mini, int *fd, int count_cmd) //fn length too long, to shorten it
+// {
+// 	int		i;
+// 	int		j;
+// 	t_cmd	*head;
+// 	pid_t	pid;
+
+// 	head = mini->cmd;
+// 	i = 0;
+// 	j = 0;
+// 	while (head != NULL)
+// 	{
+// 		//check on fork. I am forking one extra
+// 		pid = fork();
+// 		if (pid == -1)
+// 		{
+// 			perror("fork");
+// 			return ;
+// 		}
+// 		if (pid == 0)
+// 		{
+// 			if (head->next != NULL) //check if there is a next cmd
+// 				dup2(fd[i + 1], head->outfile);
+// 			if (i != 0) //check if there is a prev cmd
+// 				dup2(fd[i - 2], head->infile); //need to check if this works with the same infile or the prev infile
+// 			j = -1;
+// 			while (++j < 2 * (count_cmd))
+// 				close(fd[j]);
+// 			if (begin_exec_cmd(mini, head) == 1)
+// 			{
+// 				// printf("debug initiate_execute\n"); //in case of a critical error exit
+// 				return ; //to modify depending on what to close and to wait for child processes
+// 			}
+// 		}
+// 		i = i + 2;
+// 		head = head->next;
+// 	}
+// 	j = -1;
+// 	// closing all parent fds
+// 	while (++j < (2 * (count_cmd)))
+// 		close(fd[j]);
+// 	j = -1;
+// 	// waiting for child process to end
+// 	while (++j < count_cmd)
+// 		wait(NULL);
+// }
+
 /*End of initiate_execute.c*/
 
 /*start of expand_variables.c*/
@@ -858,37 +1249,52 @@ int	expand_variables(t_minishell *mini)
 
 /*start of execute.c*/
 
+// int	*create_pipes(t_minishell *mini, int count_cmd)
+// {
+// 	int		*fd;
+// 	int		i;
+// 	t_cmd	*head;
+
+// 	i = 0;
+// 	head = mini->cmd;
+// 	fd = ft_calloc(2 * (count_cmd - 1), sizeof(int));
+// 	if (count_cmd > 1 && fd == NULL)
+// 	{
+// 		mini->last_exit = errno;
+// 		return (perror("malloc"), NULL);
+// 	}
+// 	while (i < count_cmd - 1)
+// 	{
+// 		if (pipe(fd + (i * 2)) < 0)
+// 		{
+// 			mini->last_exit = errno;
+// 			return (perror("pipe"), NULL);
+// 		}
+// 		i++;
+// 	}
+// 	return (fd);
+// }
+
 int	*create_pipes(t_minishell *mini, int count_cmd)
 {
-	int	*fd;
-	int	i;
-	int	j;
+	int		*fd;
+	int		i;
+	t_cmd	*head;
 
-	if (count_cmd <= 1)
-		return (NULL);
-	fd = ft_calloc(2 * (count_cmd - 1), sizeof(int));
-	if (!fd)
-	{
-		mini->last_exit = ENOMEM;
-		perror("malloc");
-		return (NULL);
-	}
 	i = 0;
-	while (i < count_cmd - 1)
+	head = mini->cmd;
+	fd = ft_calloc(2 * (count_cmd), sizeof(int));
+	if (fd == NULL)
+	{
+		mini->last_exit = errno;
+		return (perror("malloc"), NULL);
+	}
+	while (i < count_cmd)
 	{
 		if (pipe(fd + (i * 2)) < 0)
 		{
 			mini->last_exit = errno;
-			perror("pipe");
-			j = 0;
-			while (j < i)
-			{
-				close(fd[j * 2]);
-				close(fd[j * 2 + 1]);
-				j++;
-			}
-			free(fd);
-			return (NULL);
+			return (perror("pipe"), NULL);
 		}
 		i++;
 	}
@@ -911,138 +1317,79 @@ int	handle_inout_fd(t_cmd *head)
 	}
 	return (count_cmd);
 }
+
 void	ft_terminate_execute(t_minishell *mini)
 {
 	t_cmd	*head;
 	t_cmd	*next;
-	// int		i;
+	int		i;
 
 	head = mini->cmd;
 	while (head != NULL)
 	{
 		next = head->next;
-		// i = 0;
-		// while (head->args && head->args[++i] != NULL)
-		// {
-		// 	free (head->args[i]);
-		// 	i++;
-		// }
-		// free (head->args);
-		// head->args = NULL;
-		// free (head);
-		// head = NULL;
-		// head = next;
+		i = -1;
+		while (head->args && head->args[++i] != NULL)
+		{
+			free (head->args[i]);
+			head->args = NULL;
+		}
+		free (head->args);
+		head->args = NULL;
+		free (head);
+		head = NULL;
+		head = next;
 	}
-	mini->cmd = NULL;
 	// if (mini->cmd != NULL)
 	// {
 	// 	printf("check 7\n");
 	// 	free (mini->cmd);
 	// 	mini->cmd = NULL;
 	// }
-	// free (mini);
+	free (mini);
 }
 
+// void	ft_debug(t_minishell *mini)
+// {
+// 	t_cmd	*head;
+// 	int		i;
+// 	int		j;
+
+// 	i = 0;
+// 	j = 0;
+// 	head = mini->cmd;
+// 	// printf("ft_debug\n");
+// 	while (head != NULL)
+// 	{
+// 		i = 0;
+// 		printf("cmd: %d\n", ++j);
+// 		while (head->args[i] != NULL)
+// 		{
+// 			printf ("args[%d] = %s; quote_type: %d\n", i, head->args[i], head->quote_type[i]);
+// 			i++;
+// 		}
+// 		printf ("\n");
+// 		head = head->next;
+// 	}
+// }
 
 void	execute(t_minishell *mini)
 {
 	int		*fd;
 	int		count_cmd;
-	int		i;
-	int		j;
-	t_cmd	*head;
 
-	i = 0;
-	j = 0;
-	head = mini->cmd;
-	if (mini->cmd == NULL)
-	{
-		printf("cmd is NULL\n");
-	}
-	while (head != NULL)
-	{
-		i = 0;
-		printf ("cmd %d\n", ++j);
-		while (head->args[i] != NULL)
-		{
-			printf("args[%d] = %s\n", i, head->args[i]);
-			i++;
-		}
-		head = head->next;
-	}
+	// ft_debug(mini);
 	count_cmd = handle_inout_fd(mini->cmd);
+	// ft_expand_all(mini);
 	fd = NULL;
 	fd = create_pipes(mini, count_cmd);
-	// if (fd != NULL && expand_variables(mini) == 0) //to write expand_variables late
-	initiate_execute(mini, fd, count_cmd);
+	if ((fd != NULL)) //to write expand_variables later
+	{
+		// printf ("debug pre initiate\n");
+		initiate_execute(mini, fd, count_cmd);
+		// printf("debug execute\n");
+	}
+	// ft_terminate_execute(mini);
 }
-
 /*end of execute.c*/
 
-// int	main(int argc, char **argv, char **env)
-// {
-// 	int			i;
-// 	t_minishell	*mini;
-// 	t_cmd		*cmd1;
-// 	t_cmd		*cmd2;
-// 	t_cmd		*cmd3;
-// 	int			j;
-
-// 	i = 0;
-// 	while (env[i] != NULL)
-// 		i++;
-// 	mini = malloc(sizeof(t_minishell));
-// 	mini->env = malloc((i + 1) * sizeof(char *));
-// 	j = 0;
-// 	while (j < i)
-// 	{
-// 		mini->env[j] = ft_strdup(env[j]);
-// 		j++;
-// 	}
-// 	mini->env[j] = NULL;
-// 	mini->last_exit = 0;
-// 	cmd1 = malloc(sizeof(t_cmd));
-// 	cmd2 = malloc(sizeof(t_cmd) * 1);
-// 	cmd3 = malloc(sizeof(t_cmd) * 1);
-// 	mini->cmd = cmd1;
-// 	cmd1->args = malloc(sizeof(char *) * 5);
-// 	cmd1->args[0] = ft_strdup("ls");
-// 	cmd1->args[1] = ft_strdup("-l");
-// 	cmd1->args[2] = NULL;
-// 	cmd1->args[3] = NULL;
-// 	cmd1->args[4] = NULL;
-// 	cmd1->infile = STDIN_FILENO;
-// 	cmd1->outfile = STDOUT_FILENO;
-// 	cmd1->parsing_error = 0;
-// 	cmd1->singlequote = 0;
-// 	cmd1->doublequote = 0;
-// 	// cmd1->next = cmd2;
-// 	cmd1->next = NULL;
-// 	cmd2->args = malloc(sizeof(char *) * 5);
-// 	cmd2->args[0] = ft_strdup("echo");
-// 	cmd2->args[1] = ft_strdup("whats");
-// 	cmd2->args[2] = ft_strdup("up");
-// 	cmd2->args[3] = NULL;
-// 	cmd2->args[4] = NULL;
-// 	cmd2->infile = STDIN_FILENO;
-// 	cmd2->outfile = STDOUT_FILENO;
-// 	cmd2->parsing_error = 0;
-// 	cmd2->singlequote = 0;
-// 	cmd2->doublequote = 0;
-// 	// cmd2->next = cmd3;
-// 	cmd2->next = NULL;
-// 	cmd3->args = malloc(sizeof(char *) * 5);
-// 	cmd3->args[0] = ft_strdup("");
-// 	cmd3->args[1] = ft_strdup("");
-// 	cmd3->args[2] = ft_strdup("");
-// 	cmd3->args[3] = NULL;
-// 	cmd3->args[4] = NULL;
-// 	cmd3->infile = STDIN_FILENO;
-// 	cmd3->outfile = STDOUT_FILENO;
-// 	cmd3->parsing_error = 0;
-// 	cmd3->singlequote = 0;
-// 	cmd3->doublequote = 0;
-// 	cmd3->next = NULL;
-// 	execute(mini);
-// 	return (0);
-// }

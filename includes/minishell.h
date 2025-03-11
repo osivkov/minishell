@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/09 15:12:11 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/11 15:39:41 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@
 #ifndef PATH_MAX
 #define PATH_MAX 4096 
 #endif
-#define SINGLE_QUOTE_MARKER "\x01"
-#define DOUBLE_QUOTE_MARKER "\x02"
+
 
 
 
@@ -44,11 +43,10 @@ typedef enum	e_token_type {
 	T_HEREDOC		// Symbol <<
 } t_token_type;
 
-typedef	enum e_quote_type {
-	NO_QUOTE,
-	SINGLE_QUOTE,
-	DOUBLE_QUOTE
-}	t_quote_type;
+// typedef	enum e_quote_type {
+// 	SINGLE_QUOTE,
+// 	DOUBLE_QUOTE
+// }	t_quote_type;
 
 typedef enum	e_parse_err {
 	PARSE_OK,
@@ -64,7 +62,7 @@ typedef enum	e_parse_err {
 typedef struct s_token {
 	char			*value; // Token value (command, argument, operator)
 	int				type;   // Token type (e.g., COMMAND, ARGUMENT, PIPE, REDIRECT)
-	t_quote_type	quote_type;
+	int				*qt_array;
 	struct s_token	*next;  // Pointer to the next token in the list
 } t_token;
 
@@ -77,7 +75,7 @@ typedef struct s_cmd {
 	char	**args;		// Argument array (first element is the command)
 	int		infile;		// File descriptor for input redirection
 	int		outfile;		// File descriptor for output redirection
-	int		is_builtin;
+	int		is_builtin;;
 	// int		parsing_error;// Flag indicating whether the command is built-in
 	struct s_cmd	*next;		// Next command in the pipeline (if using pipes)
 }	t_cmd;
@@ -142,7 +140,7 @@ void	token_to_list(t_token **head, t_token **current, t_token *new_token);
 t_token	*create_double_operator_token(char **input);
 t_token	*create_single_operator_token(char **input);
 t_token	*create_special_token(char **input);
-t_token	*create_word_token(char **input);
+t_token	*create_word_token(t_minishell *shel,char **input);
 // char	**expand_variables(char **args);
 
 /*Function for runn shell*/

@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 14:50:09 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/08 16:47:37 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/11 15:56:42 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,53 @@ char	*get_env_value(t_minishell *shell, const char *var)
 	return (""); // If variable not found, return an empty string.
 }
 
+
+// static char	*expand_variables(t_minishell *shell, char *str, const int *qt_array)
+// {
+// 	size_t	i;
+// 	char	*temp;
+// 	char	*expand;
+// 	char 	*exit_str;
+// 	size_t	j;
+// 	char	*var_name;
+
+// 	expand = ft_strdup("");
+// 	if (!expand)
+// 	{
+// 		return NULL;
+// 		//error maloc
+// 	}
+// 	while (str[i])
+// 	{
+// 		if (str[i == '$' && qt_array != 1])
+// 		{
+// 			if (str[i + 1] == '?')
+// 			{
+// 				exit_str = ft_itoa(shell->last_exit);
+// 				temp = ft_strjoin(expand, exit_str);
+// 				free(expand);
+// 				expand = temp;
+// 				free(exit_str);
+// 				i += 2;
+// 			}
+// 		}
+// 		else if (ft_isalpha(str[i + 1]) || str[i + 1] == '_')
+// 		{
+// 			j = i + 1;
+// 			while(str[j] && ft_isalnum(str[j] || str[j == '_']))
+// 			{
+// 				j++;
+// 			}
+// 			var_name = ft_substr(str, i + 1, j - (i + 1));
+			
+// 		}
+// 	}
+	
+// }
+
 // Function to expand environment variables in the given string.
 // It replaces occurrences of $VAR and $? with their corresponding values.
-static char	*expand_variables(t_minishell *shell, char *str)
+static char	*expand_variables(t_minishell *shell, char *str, const int qt_array)
 {
 	size_t	i;
 	char	*result;
@@ -152,4 +196,33 @@ void	expand_command_variables(t_minishell *shell, t_cmd *cmd_list)
 		}
 		cmd_list = cmd_list->next;
 	}
+}
+
+
+void	expand_quotes(t_minishell *shell, t_token *token)
+{
+	char	*str = token->value;
+	int		*qt = token->qt_array;
+	char	*expanded = ft_strdup("");
+	if (!expanded)
+	{
+		shell->last_exit = 2;
+		return;
+		
+	}
+	int i = 0;
+	while(str[i])
+	{
+		if (str[i] == '$' && qt[i] != 1)
+		{
+			//
+		}
+		else
+		{
+			
+		}
+		i++;
+	}
+	free(token->value);
+	token->value = expanded;
 }
