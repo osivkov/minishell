@@ -75,7 +75,8 @@ typedef struct s_cmd {
 	char	**args;		// Argument array (first element is the command)
 	int		infile;		// File descriptor for input redirection
 	int		outfile;		// File descriptor for output redirection
-	int		is_builtin;;
+	int		is_builtin;
+	int		**quote_type;
 	// int		parsing_error;// Flag indicating whether the command is built-in
 	struct s_cmd	*next;		// Next command in the pipeline (if using pipes)
 }	t_cmd;

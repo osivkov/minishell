@@ -77,6 +77,8 @@ t_token *lexer(t_minishell *shell, char *input)
 
 
 
+
+
 // t_token *lexer(char *input)
 // {
 // 	t_token *head = NULL;

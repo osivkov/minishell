@@ -123,8 +123,8 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	t_cmd	*cmd;
 	int		arg_count;
 	char	**args;
+	int		**qtypes; // Здесь будем хранить указатели на массивы кавычек для каждого аргумента
 	int		i;
-	int		*i_qtype;
 
 	cmd = alloc_cmd_struct(shell);
 	if (!cmd)
@@ -132,29 +132,30 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	arg_count = count_args(shell, *tokens);
 	if (arg_count < 0)
 		return (free(cmd), NULL);
+	// Выделяем память для массива аргументов
 	args = malloc(sizeof(char *) * (arg_count + 1));
 	if (!args)
 		return (free(cmd), shell->last_exit = 2, NULL);
-	i_qtype = malloc(sizeof(int) * arg_count);
-		if (!arg_count || !i_qtype)
-		{
-			if (args)
-			{
-				free(args);
-			}
-			else if (i_qtype)
-				free(i_qtype);
-			free(cmd);
-			shell->last_exit = 10;
-			return (NULL);
-		}
+	// Выделяем память для массива указателей на qt_array для каждого аргумента
+	qtypes = malloc(sizeof(int *) * (arg_count + 1));
+	if (!qtypes)
+	{
+		free(args);
+		free(cmd);
+		shell->last_exit = 10;
+		return (NULL);
+	}
 	i = 0;
 	/* Обрабатываем все токены до T_PIPE */
 	while (*tokens && (*tokens)->type != T_PIPE)
 	{
 		if ((*tokens)->type == T_WORD)
 		{
+			// Дублируем значение токена
 			args[i] = ft_strdup((*tokens)->value);
+			// Переносим указатель на массив с информацией о кавычках
+			// (При этом ответственность за освобождение памяти переходит к команде)
+			qtypes[i] = (*tokens)->qt_array;
 			i++;
 			*tokens = (*tokens)->next;
 		}
@@ -184,10 +185,12 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 			break ;
 	}
 	args[i] = NULL;
+	qtypes[i] = NULL;
 	cmd->args = args;
-	cmd->quote_type = i_qtype;
+	cmd->quote_type = qtypes;
 	return (cmd);
 }
+
 
 /*
 ** parse_pipeline:

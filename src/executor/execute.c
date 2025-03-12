@@ -273,32 +273,31 @@ char	*ft_expand_str(t_minishell *mini, char *str, t_cmd *head)
 	return (final);
 }
 
-int	ft_expand_all(t_minishell *mini)
-{
-	t_cmd	*head;
-	int		i;
-	int		j;
-	char	*final;
+// int	ft_expand_all(t_minishell *mini)
+// {
+// 	t_cmd	*head;
+// 	int		i;
+// 	char	*final;
 
-	j = 0;
-	head = mini->cmd;
-	while (head != NULL)
-	{
-		i = 0;
-		while (head->args[i] != NULL)
-		{
-			if (head->quote_type[i] != 1)
-			{
-				final = ft_expand_str(mini, head->args[i], head);
-				free (head->args[i]);
-				head->args[i] = final;
-			}
-			i++;
-		}
-		head = head->next;
-	}
-	return (0);
-}
+	
+// 	head = mini->cmd;
+// 	while (head != NULL)
+// 	{
+// 		i = 0;
+// 		while (head->args[i] != NULL)
+// 		{
+// 			if (head->quote_type[i] != 1)
+// 			{
+// 				final = ft_expand_str(mini, head->args[i], head);
+// 				free (head->args[i]);
+// 				head->args[i] = final;
+// 			}
+// 			i++;
+// 		}
+// 		head = head->next;
+// 	}
+// 	return (0);
+// }
 
 int	ft_malloc_error(t_minishell *mini)
 {
@@ -708,11 +707,11 @@ int	ft_check_env_name(char *name)
 int	ft_get_value_len(char *str)
 {
 	int		i;
-	int		len;
+	// int		len;
 	int		value_len;
 
 	i = 0;
-	len = ft_strlen(str);
+	// len = ft_strlen(str);
 	value_len = 0;
 	while (str[i] != '\0')
 	{
@@ -936,10 +935,10 @@ int	ft_unset(t_minishell *mini, t_cmd *current_cmd)
 
 int	ft_exit(t_minishell *mini, t_cmd *current_cmd)
 {
-	int		i;
+	// int		i;
 
 	if (current_cmd != NULL)
-		i = 0;
+		// i = 0;
 	ft_terminate_execute(mini);
 	printf("exit\n");
 	exit (0);
@@ -1279,10 +1278,10 @@ int	*create_pipes(t_minishell *mini, int count_cmd)
 {
 	int		*fd;
 	int		i;
-	t_cmd	*head;
+	// t_cmd	*head;
 
 	i = 0;
-	head = mini->cmd;
+	// head = mini->cmd;
 	fd = ft_calloc(2 * (count_cmd), sizeof(int));
 	if (fd == NULL)
 	{
@@ -1392,4 +1391,3 @@ void	execute(t_minishell *mini)
 	// ft_terminate_execute(mini);
 }
 /*end of execute.c*/
-

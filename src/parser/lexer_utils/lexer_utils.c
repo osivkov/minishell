@@ -165,47 +165,55 @@ t_token *create_word_token(t_minishell *shell, char **input)
 {
     t_token *token;
     char    *value;         // временный буфер для символов
-    int     *quote_type;    // параллельный массив: 0=unquoted, 1=single, 2=double
+    int     *quote_type;    // массив типов кавычек для каждого символа
     int     ret;
 
     value = NULL;
     quote_type = NULL;
 
-    // Пока не встретим пробел, оператор, конец строки
+    // Если токен начинается с '$' и следующий символ – кавычка, то
+    // это специальный случай, который должен выводить литерал.
+    if (**input == '$' && ((*input)[1] == '\'' || (*input)[1] == '\"'))
+    {
+        // Пропускаем '$'
+        (*input)++;
+        // Устанавливаем маркер, который означает "без expand" (например, 0x01)
+        ret = append_char(&value, &quote_type, 0x01, 0);
+        if (ret < 0)
+            return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
+    }
+
+    // Далее идёт стандартное считывание слова:
     while (**input && !ft_isspace(**input) && !is_operator_char(**input))
     {
-        // Если одиночная кавычка
         if (**input == '\'')
         {
-            (*input)++; // пропускаем саму кавычку '
+            (*input)++; // пропускаем открывающую кавычку
             while (**input && **input != '\'')
             {
                 ret = append_char(&value, &quote_type, **input, 1 /* single */);
                 if (ret < 0)
-                    return (ft_putendl_fd("malloc error", 2), shell->last_exit=12, NULL);
+                    return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
                 (*input)++;
             }
             if (**input != '\'')
             {
-                // не нашли закрывающую кавычку
                 ft_putendl_fd("minishell: syntax error: missing closing single quote", 2);
                 shell->last_exit = 2;
                 free(value);
                 free(quote_type);
                 return NULL;
             }
-            // пропускаем закрывающую кавычку
-            (*input)++;
+            (*input)++; // пропускаем закрывающую кавычку
         }
-        // Если двойная кавычка
         else if (**input == '\"')
         {
-            (*input)++; // пропускаем "
+            (*input)++; // пропускаем открывающую двойную кавычку
             while (**input && **input != '\"')
             {
                 ret = append_char(&value, &quote_type, **input, 2 /* double */);
                 if (ret < 0)
-                    return (ft_putendl_fd("malloc error", 2), shell->last_exit=12, NULL);
+                    return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
                 (*input)++;
             }
             if (**input != '\"')
@@ -216,24 +224,20 @@ t_token *create_word_token(t_minishell *shell, char **input)
                 free(quote_type);
                 return NULL;
             }
-            // пропускаем закрывающую кавычку
-            (*input)++;
+            (*input)++; // пропускаем закрывающую кавычку
         }
         else
         {
-            // Обычный символ (unquoted)
             ret = append_char(&value, &quote_type, **input, 0 /* unquoted */);
             if (ret < 0)
-                return (ft_putendl_fd("malloc error", 2), shell->last_exit=12, NULL);
+                return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
             (*input)++;
         }
     }
 
-    // Если мы вообще не записали ни одного символа — значит пусто (не обяз. ошибка)
     if (!value)
         return NULL;
 
-    // Создаём сам t_token
     token = (t_token *)malloc(sizeof(t_token));
     if (!token)
     {
@@ -243,70 +247,9 @@ t_token *create_word_token(t_minishell *shell, char **input)
         shell->last_exit = 12;
         return NULL;
     }
-    token->value      = value;
-    token->type       = T_WORD; // или просто = 0, если у вас enum
-         	// <-- Обычно у вас quote_type – int, но 
-	token->qt_array = quote_type;//    здесь вы храните массив (придётся его где-то сохранить).
-                                //    Можете заменить на собственное поле.
-    token->next       = NULL;
-
-    /*
-     * Если вы хотите сохранить массив int (quote_type) в самом token-е,
-     * то измените структуру t_token: сделайте, например,
-     *   int *qt_array;
-     * И здесь:  token->qt_array = quote_type;
-     * чтобы при экспанде знать, какой символ под single, double или none.
-     */
-    
+    token->value = value;
+    token->type = T_WORD;
+    token->qt_array = quote_type;
+    token->next = NULL;
     return token;
 }
-
-
-/*
-	Static function to create a word token.
-	Gathers characters until a space or operator is encountered.
-*/
-// t_token	*create_word_token(char **input)
-// {
-// 	char *buf;
-// 	char	*start;
-// 	int		len;
-// 	t_token	*token;
-
-// 	token = malloc(sizeof(t_token));
-// 	len = 0;
-// 	start = *input;
-// 	if (!token)
-// 		return (NULL);
-// 	token->next = NULL;
-// 	while (**input && !ft_isspace(**input) && **input != '|'
-// 		&& **input != '<' && **input != '>')
-// 	{
-// 		len++;
-// 		(*input)++;
-// 	}
-// 	token->value = ft_substr(start, 0, len);
-// 	token->type = T_WORD;
-// 	return (token);
-// }
-
-// char	*create_word_token(char **input)
-// {
-// 	char	*start;
-// 	int		len;
-
-// 	start = *input;
-// 	len = 0;
-// 	while (**input && !ft_isspace(**input) && **input != '|'
-// 		&& **input != '<' && **input != '>')
-// 	{
-// 		if (**input == '\'' || **input == '\"')
-// 		{
-// 			ft_putendl_fd("Minishell: syntax error: stray quote",2);
-// 			return (NULL);
-// 		}
-// 		len++;
-// 		(*input);
-// 	}
-// 	return (ft_substr(start, 0, len));
-// }
