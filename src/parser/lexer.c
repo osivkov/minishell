@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/10 18:10:57 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 15:44:14 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,52 +24,34 @@
 
 t_token *lexer(t_minishell *shell, char *input)
 {
-    t_token *head = NULL;
-    t_token *current = NULL;
-    t_token *new_token = NULL;
+	t_token *head = NULL;
+	t_token *current = NULL;
+	t_token *new_token = NULL;
 
-    while (*input)
-    {
-        // Пропускаем пробелы
-        while (*input && ft_isspace(*input))
-            input++;
-        // Если дошли до конца строки, выходим из цикла
-        if (!*input)
-            break;
-	// Определяем, что за токен нужно создавать
-		// if (*input == '\'' || *input == '\"')
-		// {
-        //     if (*input == '\'')
-		// 		new_token->quote_type = 1;
-		// 	else
-		// 		new_token->quote_type = 2;
-		// new_token = process_quotes(shell, &input, *input);
-		// printf("Token: '%s', quote type: %d\n", new_token->value, new_token->quote_type);
-        // }
-        else if (*input == '|' || *input == '<' || *input == '>')
-        {
-            // create_special_token(&input);
-            new_token = create_special_token(&input);
-        }
-        else
-        {
-            // Обычное слово
-            new_token = create_word_token(shell, &input);
-        }
-        // Если создание токена вернуло NULL, значит произошла ошибка 
-        // (например, unmatched quotes, проблемы с malloc, и т.д.)
-        if (!new_token)
-        {
-            // Например, process_quotes уже могла поставить shell->last_exit = 2 
-            // и вывести сообщение, но если нет, мы можем сделать это здесь:
-            if (shell->last_exit == 0)
-            {
-                shell->last_exit = 2;
-                fprintf(stderr, "minishell: lexer error\n");
-            }
+	while (*input)
+	{
+		while (*input && ft_isspace(*input))
+			input++;
+		if (!*input)
+			break;
+		else if (*input == '|' || *input == '<' || *input == '>')
+		{
+			new_token = create_special_token(&input);
+		}
+		else
+		{
+			new_token = create_word_token(shell, &input);
+		}
+		if (!new_token)
+		{
+			if (shell->last_exit == 0)
+			{
+				shell->last_exit = 2;
+				fprintf(stderr, "minishell: lexer error\n");
+			}
 			free_tokens(head);
 			return NULL;
-        }
+		}
 	token_to_list(&head, &current, new_token);
 	}
 	return head;

@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 10:50:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/10 18:08:31 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 16:01:55 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ t_token	*create_double_operator_token(char **input)
 	if (!token)
 		return (NULL);
 	token->next = NULL;
+	token->qt_array = NULL;
 	if (**input == '<' && *(*input + 1) == '<')
 	{
 		token->value = ft_strdup("<<");
@@ -66,6 +67,7 @@ t_token	*create_single_operator_token(char **input)
 	if (!token)
 		return (NULL);
 	token->next = NULL;
+	token->qt_array = NULL;
 	{
 		tmp[0] = **input;
 		tmp[1] = '\0';
@@ -219,7 +221,7 @@ t_token *create_word_token(t_minishell *shell, char **input)
             if (**input != '\"')
             {
                 ft_putendl_fd("minishell: syntax error: missing closing double quote", 2);
-                shell->last_exit = 2;
+                shell->last_exit = 10;
                 free(value);
                 free(quote_type);
                 return NULL;

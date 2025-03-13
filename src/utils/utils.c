@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/02/28 14:44:26 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 15:57:25 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,14 @@ void free_minishell(t_minishell *shell)
 		while (shell->env[i])
 		{
 			free(shell->env[i]);
-		i++;
+			i++;
 		}
 		free(shell->env);
 	}
-	// for the tokens and cmd struct;
-	free_tokens(shell->tokens);
-	free_cmd(shell->cmd);
+	// if (shell->tokens)
+	// 	free_tokens(shell->tokens);
+	// if (shell->cmd)
+	// 	free_cmd(shell->cmd);
 	free(shell);
 }
 

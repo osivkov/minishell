@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 12:29:36 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 12:42:17 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,8 @@ t_token	*create_special_token(char **input);
 t_token	*create_word_token(t_minishell *shel,char **input);
 // char	**expand_variables(char **args);
 /*For expand*/
-char	*handle_dollar(t_minishell *shell, const char *str,const int *qt_array, char *expanded, size_t *i);
+char	*h_d(t_minishell *shell, const char *str,char *exp, size_t *i);
+char	*hane_dol_var(t_minishell *shell, const char *str, size_t *i, char *exp);
 char	*append_char_exp(char *expanded, char c);
 /*Finish expand*/
 /*Function for runn shell*/

@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 12:24:55 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 12:30:37 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 12:42:54 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
 
 char	*append_char_exp(char *expanded, char c)
 {
@@ -43,7 +42,7 @@ static char	*handle_dollar_exit(t_minishell *shell, char *expanded, size_t *i)
 	return (expanded);
 }
 
-static char	*handle_dollar_variable(t_minishell *shell, const char *str, size_t *i, char *expanded)
+char	*hane_dol_var(t_minishell *shell, const char *str, size_t *i, char *exp)
 {
 	size_t	j;
 	char	*var_name;
@@ -56,24 +55,23 @@ static char	*handle_dollar_variable(t_minishell *shell, const char *str, size_t 
 	var_name = ft_substr(str, *i + 1, j - (*i + 1));
 	value = get_env_value(shell, var_name);
 	free(var_name);
-	temp = ft_strjoin(expanded, value);
-	free(expanded);
-	expanded = temp;
+	temp = ft_strjoin(exp, value);
+	free(exp);
+	exp = temp;
 	*i = j;
-	return (expanded);
+	return (exp);
 }
 
-char	*handle_dollar(t_minishell *shell, const char *str,const int *qt_array, char *expanded, size_t *i)
+char	*h_d(t_minishell *shell, const char *str, char *exp, size_t *i)
 {
-	(void)qt_array;
 	if (str[*i + 1] == '?')
-		expanded = handle_dollar_exit(shell, expanded, i);
+		exp = handle_dollar_exit(shell, exp, i);
 	else if (ft_isalpha(str[*i + 1]) || str[*i + 1] == '_')
-		expanded = handle_dollar_variable(shell, str, i, expanded);
+		exp = hane_dol_var(shell, str, i, exp);
 	else
 	{
-		expanded = append_char_exp(expanded, '$');
+		exp = append_char_exp(exp, '$');
 		(*i)++;
 	}
-	return (expanded);
+	return (exp);
 }
