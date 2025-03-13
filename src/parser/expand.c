@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 14:50:09 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/11 15:56:42 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 12:23:15 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,116 +40,99 @@ char	*get_env_value(t_minishell *shell, const char *var)
 	return (""); // If variable not found, return an empty string.
 }
 
+static char	*append_char(char *expanded, char c)
+{
+	char	temp[2];
+	char	*result;
 
-// static char	*expand_variables(t_minishell *shell, char *str, const int *qt_array)
-// {
-// 	size_t	i;
-// 	char	*temp;
-// 	char	*expand;
-// 	char 	*exit_str;
-// 	size_t	j;
-// 	char	*var_name;
+	temp[0] = c;
+	temp[1] = '\0';
+	result = ft_strjoin(expanded, temp);
+	free(expanded);
+	return (result);
+}
 
-// 	expand = ft_strdup("");
-// 	if (!expand)
-// 	{
-// 		return NULL;
-// 		//error maloc
-// 	}
-// 	while (str[i])
-// 	{
-// 		if (str[i == '$' && qt_array != 1])
-// 		{
-// 			if (str[i + 1] == '?')
-// 			{
-// 				exit_str = ft_itoa(shell->last_exit);
-// 				temp = ft_strjoin(expand, exit_str);
-// 				free(expand);
-// 				expand = temp;
-// 				free(exit_str);
-// 				i += 2;
-// 			}
-// 		}
-// 		else if (ft_isalpha(str[i + 1]) || str[i + 1] == '_')
-// 		{
-// 			j = i + 1;
-// 			while(str[j] && ft_isalnum(str[j] || str[j == '_']))
-// 			{
-// 				j++;
-// 			}
-// 			var_name = ft_substr(str, i + 1, j - (i + 1));
-			
-// 		}
-// 	}
-	
-// }
+static char	*handle_dollar_exit(t_minishell *shell, char *expanded, size_t *i)
+{
+	char	*exit_str;
+	char	*temp;
 
-// Function to expand environment variables in the given string.
-// It replaces occurrences of $VAR and $? with their corresponding values.
-char *expand_variables_with_quotes(t_minishell *shell, const char *str, const int *qt_array)
+	exit_str = ft_itoa(shell->last_exit);
+	temp = ft_strjoin(expanded, exit_str);
+	free(expanded);
+	expanded = temp;
+	free(exit_str);
+	*i += 2;
+	return (expanded);
+}
+
+static char	*handle_dollar_variable(t_minishell *shell, const char *str, size_t *i, char *expanded)
+{
+	size_t	j;
+	char	*var_name;
+	char	*value;
+	char	*temp;
+
+	j = *i + 1;
+	while (str[j] && (ft_isalnum(str[j]) || str[j] == '_'))
+		j++;
+	var_name = ft_substr(str, *i + 1, j - (*i + 1));
+	value = get_env_value(shell, var_name);
+	free(var_name);
+	temp = ft_strjoin(expanded, value);
+	free(expanded);
+	expanded = temp;
+	*i = j;
+	return (expanded);
+}
+
+static char	*handle_dollar(t_minishell *shell, const char *str,
+	const int *qt_array, char *expanded, size_t *i)
+{
+	(void)qt_array;
+	if (str[*i + 1] == '?')
+		expanded = handle_dollar_exit(shell, expanded, i);
+	else if (ft_isalpha(str[*i + 1]) || str[*i + 1] == '_')
+		expanded = handle_dollar_variable(shell, str, i, expanded);
+	else
+	{
+		expanded = append_char(expanded, '$');
+		(*i)++;
+	}
+	return (expanded);
+}
+
+
+char	*expand_variables_with_quotes(t_minishell *shell,
+	const char *str, const int *qt_array)
 {
 	char	*expanded;
-	char	*temp;
 	size_t	i;
 
-	expanded = ft_strdup("");	// начинаем с пустой строки
+	expanded = ft_strdup("");
 	if (!expanded)
-		return (NULL);
+	return (NULL);
 	i = 0;
 	while (str[i])
 	{
-		// Если встречаем '$' и он не находится в одинарных кавычках
-		if (str[i] == '$' && qt_array[i] != 1)
+	if (str[i] == '$' && qt_array[i] != 1)
 		{
-			/* Если после '$' идет '?' */
-			if (str[i + 1] == '?')
-			{
-				char *exit_str = ft_itoa(shell->last_exit);
-				temp = ft_strjoin(expanded, exit_str);
-				free(expanded);
-				expanded = temp;
-				free(exit_str);
-				i += 2;
-				continue;
-			}
-			/* Если после '$' идет имя переменной (буква или '_') */
-			else if (ft_isalpha(str[i + 1]) || str[i + 1] == '_')
-			{
-				size_t j = i + 1;
-				while (str[j] && (ft_isalnum(str[j]) || str[j] == '_'))
-					j++;
-				char *var_name = ft_substr(str, i + 1, j - (i + 1));
-				char *value = get_env_value(shell, var_name);
-				free(var_name);
-				temp = ft_strjoin(expanded, value);
-				free(expanded);
-				expanded = temp;
-				i = j;
-				continue;
-			}
-			else
-			{
-				// Если после '$' не идёт ни '?' ни корректное имя переменной, просто копируем '$'
-				char c[2] = {'$', '\0'};
-				temp = ft_strjoin(expanded, c);
-				free(expanded);
-				expanded = temp;
-				i++;
-				continue;
-			}
+		expanded = handle_dollar(shell, str, qt_array, expanded, &i);
+		continue ;
 		}
-		else
+	else
 		{
-			// Копируем текущий символ без изменений
-			char c[2] = {str[i], '\0'};
-			temp = ft_strjoin(expanded, c);
-			free(expanded);
-			expanded = temp;
-			i++;
+		expanded = append_char(expanded, str[i]);
+		i++;
 		}
 	}
-	return expanded;
+	return (expanded);
 }
+
+// Function to expand environment variables in the given string.
+// It replaces occurrences of $VAR and $? with their corresponding values.
+// char *expand_variables_with_quotes(t_minishell *shell, const char *str, const int *qt_array)
+
 
 
 // Function to expand variables for each argument of every command in the command list.
