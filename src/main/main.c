@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 16:14:00 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 18:10:53 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ int	run_minishell(t_minishell *shell)
 		if (shell->cmd == NULL)
 			printf("shell-cmd is NULL\n");
 		// pseudo_execute(shell);
-		// execute(shell); 
+		execute(shell); 
 		// Free tokens, command list, and input after execution
 		free_tokens(tokens);
 		tokens = NULL;
@@ -182,7 +182,7 @@ t_minishell *init_minishell(char **env)
 	shell = (t_minishell *)malloc(sizeof(t_minishell));
 	if (!shell)
 		return (NULL);
-
+	
 	/* Count the environment variables */
 	env_count = 0;
 	while (env[env_count])
@@ -241,6 +241,7 @@ int	main(int argc, char **argv, char **env)
 		return (1);
 	}
 	signal(SIGQUIT, SIG_IGN);
+	
 	shell = init_minishell(env);
 	if (!shell)
 	{

@@ -6,32 +6,33 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 15:57:25 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 18:01:19 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void free_cmd(t_cmd *cmd)
+void	free_cmd(t_cmd *cmd)
 {
-	t_cmd *tmp;
-	int i;
+	t_cmd	*tmp;
+	int	i;
 
 	while (cmd)
 	{
 		tmp = cmd;
-		cmd = cmd->next;
-		// Освобождаем массив аргументов
-		if (tmp->args)
+		if (cmd->args)
 		{
 			i = 0;
-			while (tmp->args[i])
+			while (cmd->args[i])
 			{
-				free(tmp->args[i]);
+				free(cmd->args[i]);
 				i++;
 			}
-			free(tmp->args);
+			free(cmd->args);
 		}
+		if (cmd->quote_type)  // Освобождаем массив quote_type
+			free(cmd->quote_type);
+		cmd = cmd->next;
 		free(tmp);
 	}
 }
@@ -75,10 +76,10 @@ void free_minishell(t_minishell *shell)
 		}
 		free(shell->env);
 	}
-	// if (shell->tokens)
-	// 	free_tokens(shell->tokens);
-	// if (shell->cmd)
-	// 	free_cmd(shell->cmd);
+	if (shell->tokens)
+		free_tokens(shell->tokens);
+	if (shell->cmd)
+		free_cmd(shell->cmd);
 	free(shell);
 }
 

@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 16:23:43 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 17:59:13 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	{
 		free(args);
 		free(cmd);
+		free(qtypes);
 		shell->last_exit = 10;
 		return (NULL);
 	}

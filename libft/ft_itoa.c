@@ -6,23 +6,24 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 12:25:31 by osivkov           #+#    #+#             */
-/*   Updated: 2024/10/11 12:31:43 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 18:17:21 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static int	num_len(int n)
+static int	count_digits(long nb)
 {
 	int	len;
 
-	len = 0;
-	if (n <= 0)
-		len++;
-	while (n != 0)
+	if (nb <= 0)
+		len = 1;
+	else
+		len = 0;
+	while (nb)
 	{
 		len++;
-		n /= 10;
+		nb /= 10;
 	}
 	return (len);
 }
@@ -31,23 +32,26 @@ char	*ft_itoa(int n)
 {
 	char	*str;
 	int		len;
-	long	num;
+	long	nb;
 
-	num = n;
-	len = num_len(num);
-	str = (char *)malloc((len + 1) * sizeof(char));
+	nb = n;
+	len = count_digits(nb);
+	str = malloc(sizeof(char) * (len + 1));
 	if (!str)
 		return (NULL);
 	str[len] = '\0';
-	if (num < 0)
+	nb = n;
+	if (n < 0)
 	{
 		str[0] = '-';
-		num = -num;
+		nb = -nb;
 	}
-	while (--len >= 0 && str[len] != '-')
+	else if (n == 0)
+		str[0] = '0';
+	while (nb)
 	{
-		str[len] = (num % 10) + '0';
-		num /= 10;
+		str[--len] = '0' + (nb % 10);
+		nb /= 10;
 	}
 	return (str);
 }
