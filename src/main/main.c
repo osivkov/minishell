@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 16:01:03 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 16:14:00 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ int	run_minishell(t_minishell *shell)
 		if (shell->cmd == NULL)
 			printf("shell-cmd is NULL\n");
 		// pseudo_execute(shell);
-		execute(shell); 
+		// execute(shell); 
 		// Free tokens, command list, and input after execution
 		free_tokens(tokens);
 		tokens = NULL;
@@ -228,6 +228,7 @@ int	main(int argc, char **argv, char **env)
 	struct sigaction sa;
 	(void)argc;
 	(void)argv;
+	int	exit_status;
 
 
 	// Set up signal handler for SIGINT (Ctrl-C)
@@ -248,8 +249,9 @@ int	main(int argc, char **argv, char **env)
 	}
 
 	run_minishell(shell);
+	exit_status = shell->last_exit;
 	free_minishell(shell);
-	return (shell->last_exit);
+	return (exit_status);
 }
 
 // static void	print_tokens(t_token *tokens)

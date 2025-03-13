@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/10 18:09:19 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 16:23:43 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 			{
 				ft_putendl_fd("minishell: syntax error near operator", 2);
 				free_args_on_error(args, i);
+				free(qtypes);
 				free(cmd);
 				shell->last_exit = 2;
 				return (NULL);
@@ -176,6 +177,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 			if (handle_redirect(shell, cmd, rtype, (*tokens)->value))
 			{
 				free_args_on_error(args, i);
+				free(qtypes);
 				free(cmd);
 				return (NULL);
 			}

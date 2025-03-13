@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 10:50:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 16:01:55 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/13 16:21:13 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,9 +182,12 @@ t_token *create_word_token(t_minishell *shell, char **input)
         // Устанавливаем маркер, который означает "без expand" (например, 0x01)
         ret = append_char(&value, &quote_type, 0x01, 0);
         if (ret < 0)
+		{
+			free(value);
+			free(quote_type);
             return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
+		}
     }
-
     // Далее идёт стандартное считывание слова:
     while (**input && !ft_isspace(**input) && !is_operator_char(**input))
     {
@@ -195,8 +198,12 @@ t_token *create_word_token(t_minishell *shell, char **input)
             {
                 ret = append_char(&value, &quote_type, **input, 1 /* single */);
                 if (ret < 0)
+				{
+					free(value);
+					free(quote_type);
                     return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
-                (*input)++;
+				}
+					(*input)++;
             }
             if (**input != '\'')
             {
@@ -215,8 +222,13 @@ t_token *create_word_token(t_minishell *shell, char **input)
             {
                 ret = append_char(&value, &quote_type, **input, 2 /* double */);
                 if (ret < 0)
-                    return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
-                (*input)++;
+				{
+					free(value);
+					free(quote_type);
+				return (ft_putendl_fd("malloc error", 2)
+				, shell->last_exit = 12, NULL);
+				}
+					(*input)++;
             }
             if (**input != '\"')
             {
@@ -232,26 +244,29 @@ t_token *create_word_token(t_minishell *shell, char **input)
         {
             ret = append_char(&value, &quote_type, **input, 0 /* unquoted */);
             if (ret < 0)
+			{
+				free(value);
+				free(quote_type);
                 return (ft_putendl_fd("malloc error", 2), shell->last_exit = 12, NULL);
+			}
             (*input)++;
         }
     }
 
-    if (!value)
-        return NULL;
-
-    token = (t_token *)malloc(sizeof(t_token));
-    if (!token)
-    {
-        ft_putendl_fd("malloc error", 2);
-        free(value);
-        free(quote_type);
-        shell->last_exit = 12;
-        return NULL;
-    }
-    token->value = value;
-    token->type = T_WORD;
-    token->qt_array = quote_type;
-    token->next = NULL;
-    return token;
+	if (!value)
+		return NULL;
+	token = (t_token *)malloc(sizeof(t_token));
+	if (!token)
+	{
+		ft_putendl_fd("malloc error", 2);
+		free(value);
+		free(quote_type);
+		shell->last_exit = 12;
+		return NULL;
+	}
+	token->value = value;
+	token->type = T_WORD;
+	token->qt_array = quote_type;
+	token->next = NULL;
+	return token;
 }
