@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 08:13:52 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/20 14:53:11 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/20 17:34:12 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -670,13 +670,16 @@ void	ft_clean_execute(t_minishell *mini)
 //to be modified
 int	ft_exit(t_minishell *mini, t_cmd *head)
 {
+	int	exit_status;
+
+	exit_status	= mini->last_exit;
 	if (head->args[1] != NULL)
 	{
 		ft_error_msg(head->args[0], NULL, "too many arguments");
 		return (1);
 	}
 	free_minishell(mini);
-	exit (0);
+	exit (exit_status);
 }
 
 /*execute.c*/

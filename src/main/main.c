@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/20 15:17:02 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/20 17:05:03 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,8 +233,8 @@ t_minishell *init_minishell(char **env)
 		 }
 		i++;
 	}
-	shell->env[i] = NULL;
 	update_shlvlv(shell);
+	shell->env[i] = NULL;
 	shell->tokens = NULL;
 	shell->cmd = NULL;
 	shell->last_exit = 0;

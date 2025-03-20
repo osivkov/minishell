@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 18:01:19 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/20 17:33:59 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	free_cmd(t_cmd *cmd)
 			}
 			free(cmd->args);
 		}
-		if (cmd->quote_type)  // Освобождаем массив quote_type
+		if (cmd->quote_type)
 			free(cmd->quote_type);
 		cmd = cmd->next;
 		free(tmp);
