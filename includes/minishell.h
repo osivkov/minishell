@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 12:42:17 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/20 15:07:17 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ typedef struct s_minishell {
 }	t_minishell;
 
 
-
+int		ft_set_env_var(t_minishell *mini, char *key, char *ans);
 int		ft_malloc_error(t_minishell *mini);
 void	execute(t_minishell *mini);
 void	pseudo_execute(t_minishell *mini);

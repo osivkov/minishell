@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 18:10:53 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/20 15:17:02 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,9 +163,6 @@ int	run_minishell(t_minishell *shell)
 
 
 
-
-
-
 /*
  * init_minishell:
  * - Allocates memory for the t_minishell structure.
@@ -173,6 +170,30 @@ int	run_minishell(t_minishell *shell)
  * - Initializes tokens and cmd fields to NULL.
  * - Sets the initial exit status (e.g., 0).
  */
+
+static void update_shlvlv(t_minishell *shell)
+{
+	char	*shlvlv_str;
+	int		shlvl;
+	char	*new_value;
+
+	shlvlv_str = get_env_value(shell, "SHLVL");
+	if (!shlvlv_str)
+	{
+		ft_set_env_var(shell, "SHLVL", "1");
+		return ;
+	}
+	shlvl = atoi(shlvlv_str);
+	shlvl++;
+	if (shlvl > 1000)
+	{
+		shlvl = 1;
+	}
+	new_value = ft_itoa(shlvl);
+	ft_set_env_var(shell, "SHLVL", new_value);
+	free(new_value);
+}
+
 t_minishell *init_minishell(char **env)
 {
 	t_minishell	*shell;
@@ -213,7 +234,7 @@ t_minishell *init_minishell(char **env)
 		i++;
 	}
 	shell->env[i] = NULL;
-
+	update_shlvlv(shell);
 	shell->tokens = NULL;
 	shell->cmd = NULL;
 	shell->last_exit = 0;
@@ -229,7 +250,6 @@ int	main(int argc, char **argv, char **env)
 	(void)argc;
 	(void)argv;
 	int	exit_status;
-
 
 	// Set up signal handler for SIGINT (Ctrl-C)
 	sa.sa_handler = handle_sigint;
