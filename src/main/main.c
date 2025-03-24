@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/20 17:05:03 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/24 14:29:15 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,13 +31,9 @@ char	*generate_prompt(t_minishell *shell)
 	char	*temp;
 	char	*prompt;
 
-	// Get the username from our environment
 	user = get_env_value(shell, "USER");
-	// Get the current working directory
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
 		cwd[0] = '\0';
-
-	// Form the prompt in the format "user@cwd$ "
 	temp = ft_strjoin(user, "@");
 		if(!temp)
 		{
@@ -56,45 +52,6 @@ char	*generate_prompt(t_minishell *shell)
 	prompt = temp;
 	return (prompt);
 }
-
-// void debug_print_tokens(t_token *tokens)
-// {
-// 	printf("=======Tokens============\n");
-// 	while(tokens)
-// 	{
-// 		printf("Tipe token: %d, value: '%s'\n",tokens->type, tokens->value ? tokens->value : "NULL");
-// 		tokens = tokens->next;
-// 	}
-// 	printf("======================\n");
-// }
-
-// void print_cmds(t_cmd *cmd)
-// {
-// 	int i = 0;
-
-// 	printf("=====List Comands=====\n");
-// 		while (cmd)
-// 		{
-// 			printf("Commans #%d:\n",i);
-// 			if (cmd->args)
-// 			{
-// 				int j = 0;
-// 				while (cmd->args[j])
-// 				{
-// 					printf("ARGUMENS %d: '%s'\n",j, cmd->args[j]);
-// 					j++;
-// 				}
-// 			}
-// 			else
-// 			{
-// 				printf(" NO arguments !\n");
-// 			}
-// 		printf( "infile: %d, outfile: %d\n", cmd->infile,cmd->outfile);
-// 		cmd = cmd->next;
-// 		i++;
-// 		}
-// 	printf("================\n");
-// }
 
 int	run_minishell(t_minishell *shell)
 {
@@ -241,15 +198,80 @@ t_minishell *init_minishell(char **env)
 	return (shell);
 }
 
+void	run_noninteractive_minishell(t_minishell *shell, char **argv)
+{
+	int		i;
+	t_token	*tokens;
+	t_cmd	*cmd;
+	char	**split_command;
 
+	split_command = ft_split(argv[2], ';');
+	if (split_command == NULL)
+	{
+		ft_malloc_error(shell);
+		shell->last_exit = ENOMEM;
+		return ;
+	}
+	i = 0;
+	while (split_command[i] != NULL)
+	{
+		tokens = lexer(shell, split_command[i]);
+		if (!tokens && shell->last_exit == 2)
+		{
+			ft_free_double(split_command, NULL, NULL, NULL);
+			return ;
+		}
+		cmd = parser(shell, tokens);
+		if (!cmd && shell->last_exit == 2)
+		{
+			free_tokens(tokens);
+			ft_free_double(split_command, NULL, NULL, NULL);
+			return ;
+		}
+		expand_command_variables(shell, cmd);
+		shell->cmd = cmd;
+		if (shell->cmd == NULL)
+		{
+			shell->last_exit = 2;
+			printf("shell-cmd is NULL\n");
+			free_tokens(tokens);
+			return ;
+		}
+		execute(shell);
+		free_tokens(tokens);
+		shell->tokens = NULL;
+		free_cmd(cmd);
+		shell->cmd = NULL;
+		i++;
+	}
+	ft_free_double(split_command, NULL, NULL, NULL);
+}
 
 int	main(int argc, char **argv, char **env)
 {
 	t_minishell	*shell;
 	struct sigaction sa;
-	(void)argc;
-	(void)argv;
 	int	exit_status;
+
+	if (argc > 1)
+	{
+		if (argc != 3 || ft_strncmp(argv[1], "-c", 3) != 0)
+		{
+			ft_putendl_fd("Mismatch of arguments", 2);
+			ft_putstr_fd("If you wish to run non-interactive minishell: ", 2);
+			ft_putendl_fd("use the flag \'-c\' followed by commands", 2);
+			ft_putstr_fd("If you wish to interactive minishell: ", 2);
+			ft_putendl_fd("do not provide any arguments", 2);			
+			return (1);
+		}
+		shell = init_minishell(env);
+		if (shell == NULL)
+			return (perror("Initiatlization error"), 1);
+		run_noninteractive_minishell(shell, argv);
+		exit_status = shell->last_exit;
+		free_minishell(shell);
+		return (exit_status);
+	}
 
 	// Set up signal handler for SIGINT (Ctrl-C)
 	sa.sa_handler = handle_sigint;
@@ -274,76 +296,3 @@ int	main(int argc, char **argv, char **env)
 	free_minishell(shell);
 	return (exit_status);
 }
-
-// static void	print_tokens(t_token *tokens)
-// {
-// 	while(tokens)
-// 	{
-// 		printf("Token: '%s' (Type: %d)\n", tokens->value, tokens->type);
-// 		tokens = tokens->next;
-// 	}
-// }
-
-// static void	print_commands(t_cmd *cmd)
-// {
-// 	while (cmd)
-// 	{
-// 		int i = 0;
-// 		printf("Commands: \n");
-// 		while (cmd->args && cmd->args[i])
-// 		{
-// 			printf("  args[%d]: '%s'\n", i, cmd->args[i]);
-// 			i++;
-// 		}
-// 		if (cmd->infile != 1)
-// 		{
-// 			printf("  infile: %d\n", cmd->infile);
-// 		}
-// 		if (cmd->outfile != 1)
-// 			printf("  outfile: %d\n", cmd->outfile);
-// 		cmd = cmd->next;
-// 	}
-// }
-
-
-
-// int main(void)
-// {
-// 	char *input;
-// 	t_token *tokens;
-// 	t_cmd *cmd;
-
-//     while (1)
-//     {
-// 	// Отображаем приглашение и считываем строку
-// 	input = readline("minishell_test> ");
-// 	if (!input)
-// 	{
-// 	printf("exit\n");
-// 	break; // Если введён EOF (Ctrl-D), завершаем работу
-// 	}
-// 	if (input[0] == '\0')
-// 	{
-// 	free(input);
-// 	continue;
-// 	}
-// 	add_history(input);
-
-// 	// Лексический анализ: разбиваем ввод на токены
-// 	tokens = lexer(input);
-// 	printf("\nTokens:\n");
-// 	print_tokens(tokens);
-
-// 	// Синтаксический анализ: группируем токены в команды (t_cmd)
-// 	cmd = parser(tokens);
-// 	printf("\nCommands:\n");
-// 	print_commands(cmd);
-
-// 	// Освобождаем память, выделенную для данной итерации
-// 	free(input);
-// 	free_tokens(tokens);
-// 	free_cmd(cmd);
-// 	printf("\n");
-// 	}
-// 	return 0;
-// }

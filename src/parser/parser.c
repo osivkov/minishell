@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 17:59:13 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/24 14:32:21 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,7 @@ static t_cmd	*alloc_cmd_struct(t_minishell *shell)
 	return (cmd);
 }
 
-/*
-** count_args:
-**  Пробегается по токенам (до PIPE или конца) и считает только те
-**  T_WORD, которые являются аргументами команды (не являясь операндами редиректа).
-*/
+
 static int	count_args(t_minishell *shell, t_token *runner)
 {
 	int	count;
@@ -79,11 +75,6 @@ static int	count_args(t_minishell *shell, t_token *runner)
 	return (count);
 }
 
-/*
-** handle_redirect:
-**  В зависимости от типа редиректа вызывает handle_heredoc (для <<)
-**  или открывает файл на чтение/запись, сохраняя fd в cmd.
-*/
 static int	handle_redirect(t_minishell *shell, t_cmd *cmd,
 							t_token_type rtype, char *filename)
 {
@@ -151,15 +142,16 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	while (*tokens && (*tokens)->type != T_PIPE)
 	{
 		if ((*tokens)->type == T_WORD)
-		{
-			// Дублируем значение токена
-			args[i] = ft_strdup((*tokens)->value);
-			// Переносим указатель на массив с информацией о кавычках
-			// (При этом ответственность за освобождение памяти переходит к команде)
-			qtypes[i] = (*tokens)->qt_array;
-			i++;
-			*tokens = (*tokens)->next;
-		}
+	{
+    	// Дублируем значение токена
+    	args[i] = ft_strdup((*tokens)->value);
+    	// Переносим указатель на массив с информацией о кавычках
+    	qtypes[i] = (*tokens)->qt_array;
+    	// Обнуляем qt_array в токене, чтобы избежать двойного освобождения
+    	(*tokens)->qt_array = NULL;
+    	i++;
+    	*tokens = (*tokens)->next;
+	}
 		else if ((*tokens)->type == T_REDIR_IN || (*tokens)->type == T_REDIR_OUT
 			|| (*tokens)->type == T_REDIR_APPEND || (*tokens)->type == T_HEREDOC)
 		{

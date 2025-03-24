@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/20 15:07:17 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/24 14:54:31 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,14 @@
 
 
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <linux/limits.h>
+#include <sys/wait.h>
 #include "../libft/libft.h"
 // Include other standard libraries as needed
 
@@ -98,7 +106,6 @@ typedef struct s_minishell {
 	// Additional fields can be added here (e.g., history, configuration settings, etc.)
 }	t_minishell;
 
-
 int		ft_set_env_var(t_minishell *mini, char *key, char *ans);
 int		ft_malloc_error(t_minishell *mini);
 void	execute(t_minishell *mini);
@@ -106,11 +113,15 @@ void	pseudo_execute(t_minishell *mini);
 void	expand_command_variables(t_minishell *shell, t_cmd *cmd_list);
 char	*get_env_value(t_minishell *shell, const char *var);
 /* Function prototypes for parsing */
+
+
+int			is_operator_char(char c);
 t_token		*lexer(t_minishell *shell, char *input);
 t_cmd 		*parser(t_minishell *shell, t_token *tokens);
 t_token 	*process_quotes(t_minishell *shell, char **input, char quote_char);
 int			handle_heredoc(char *delimeter);
 /*list lexer_utils functions*/
+int		append_char(char **str, int **qt, char c, int qtype);
 void	token_to_list(t_token **head, t_token **current, t_token *new_token);
 t_token	*create_double_operator_token(char **input);
 t_token	*create_single_operator_token(char **input);
@@ -133,5 +144,45 @@ void 		free_tokens(t_token *tokens);
 
 /*Function for utils*/
 int			ft_isspace(int c);
+
+/*Function for non interactive shell*/
+void	run_noninteractive_minishell(t_minishell *shell, char **argv);
+
+/*Function for executor*/
+size_t	strlen_alt(const char *s);
+void	ft_free_single(char *s1, char *s2, char *s3, char *s4);
+void	ft_free_double(char **s1, char **s2, char **s3, char **s4);
+char	*ft_strjoin_all(const char *s1, const char *s2, const char *s3, const char *s4);
+int	ft_malloc_error(t_minishell *mini);
+void	ft_error_msg(char *command, char *key, char *error_msg);
+int	ft_check_env_name(char *name);
+char	*ft_get_env_var(t_minishell *mini, char *key);
+int	ft_realloc_env(t_minishell *mini, char *temp2);
+int	ft_set_env_var(t_minishell *mini, char *key, char *ans);
+int	ft_cd_utils(t_minishell *mini, t_cmd *head, char *path, char *pwd);
+int	ft_cd(t_minishell *mini, t_cmd *head);
+int	ft_echo(t_minishell *mini, t_cmd *head, int new_line, int j);
+int	ft_env(t_minishell *mini, t_cmd *head);
+int	ft_pwd(t_minishell *mini, t_cmd *head);
+int	ft_export_util(t_minishell *mini, char *str, int i);
+int	ft_export_util_2(t_minishell *mini);
+int	ft_export(t_minishell *mini, t_cmd *head);
+int	ft_unset_utils(t_minishell *mini, char *key);
+int	ft_unset(t_minishell *mini, t_cmd *head);
+int	ft_exit(t_minishell *mini, t_cmd *head);
+int	get_final_path(t_minishell *mini, char **all_path, char *path, \
+	char *to_find);
+int	get_cmd_path(t_minishell *mini, char *to_find, char *path);
+int	ft_sys_builtin(t_minishell *mini, t_cmd *head);
+int	begin_builtin(t_minishell *mini, t_cmd *head);
+int		check_builtin(t_cmd *head);
+void	ft_kill_child(t_minishell *mini, int count_cmd);
+void	ft_handle_infile(int *fd, t_cmd *head, int i);
+void	ft_handle_outfile(int *fd, t_cmd *head, int i);
+void	ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i);
+int	*create_pipes(t_minishell *mini, int count_cmd);
+int	handle_inout_fd(t_cmd *head);
+void	initiate_execute(t_minishell *mini, int *fd, int count_cmd);
+void	execute(t_minishell *mini);
 
 #endif

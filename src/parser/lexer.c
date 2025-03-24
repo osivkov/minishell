@@ -6,136 +6,54 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/13 15:44:14 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/24 14:29:52 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include <ctype.h>
+#include <stdio.h>
 
-/*
-	Main lexer function.
-	Breaks the input string into a linked list of tokens.
-*/
-#include <stdio.h>   // Для fprintf(stderr, ...)
-
-// Предположим, что у вас есть функция free_tokens(t_token *tokens).
-// Она освобождает весь список токенов, включая строки value.
-
-t_token *lexer(t_minishell *shell, char *input)
+static t_token	*get_next_token(t_minishell *shell, char **input)
 {
-	t_token *head = NULL;
-	t_token *current = NULL;
-	t_token *new_token = NULL;
+	t_token	*new_token;
 
+	while (**input && ft_isspace(**input))
+		(*input)++;
+	if (!**input)
+		return (NULL);
+	if (**input == '|' || **input == '<' || **input == '>')
+		new_token = create_special_token(input);
+	else
+		new_token = create_word_token(shell, input);
+	return (new_token);
+}
+
+t_token	*lexer(t_minishell *shell, char *input)
+{
+	t_token	*head;
+	t_token	*current;
+	t_token	*new_token;
+
+	head = NULL;
+	current = NULL;
 	while (*input)
 	{
-		while (*input && ft_isspace(*input))
-			input++;
-		if (!*input)
-			break;
-		else if (*input == '|' || *input == '<' || *input == '>')
-		{
-			new_token = create_special_token(&input);
-		}
-		else
-		{
-			new_token = create_word_token(shell, &input);
-		}
+		new_token = get_next_token(shell, &input);
 		if (!new_token)
 		{
+			if (!*input)
+				break ;
 			if (shell->last_exit == 0)
 			{
 				shell->last_exit = 2;
-				fprintf(stderr, "minishell: lexer error\n");
+				ft_putendl_fd("minishell: syntax error near unexpected token", 2);
 			}
 			free_tokens(head);
-			return NULL;
+			return (NULL);
 		}
-	token_to_list(&head, &current, new_token);
+		token_to_list(&head, &current, new_token);
 	}
-	return head;
+	return (head);
 }
 
-
-
-
-
-// t_token *lexer(char *input)
-// {
-// 	t_token *head = NULL;
-// 	t_token *current = NULL;
-// 	while (*input)
-// 	{
-// 		// Skip spaces
-// 		while (*input && ft_isspace(*input))
-// 			input++;
-// 		if (!*input)
-// 			break;
-// 		t_token *new_token = malloc(sizeof(t_token));
-// 		if (!new_token)
-// 			return (NULL);
-// 		 if (*input == '\'' || *input == '\"')
-// 		{
-// 			free(new_token);
-// 			t_token *quoted_token = process_quotes(&input, *input);
-// 			if (!quoted_token)
-// 			// Handle error for unclosed quote
-// 			return (NULL);
-// 			new_token = quoted_token;
-// 			// Add quoted_token to your linked list of tokens
-// 		}
-// 		// If a special character is encountered
-// 		else if (*input == '|' || *input == '<' || *input == '>')
-// 		{
-// 			if (*input == '<' && *(input + 1) == '<')
-// 			{
-// 				new_token->value = ft_strdup("<<");
-// 				new_token->type = T_HEREDOC;
-// 				input += 2;
-// 			}
-// 			else if (*input == '>' && *(input + 1) == '>')
-// 			{
-// 				new_token->value = ft_strdup(">>");
-// 				new_token->type = T_REDIR_APPEND;
-// 				input += 2;
-// 			}
-// 			else
-// 			{
-// 			new_token->value = ft_strdup((char[]){*input, '\0'});
-// 			if (*input == '|')
-// 				new_token->type = T_PIPE;
-// 			else if (*input == '<')
-// 				new_token->type = T_REDIR_IN;
-				
-// 			else if (*input == '>')
-// 				new_token->type = T_REDIR_OUT;
-// 			input++; // Move to the next character
-// 			}
-// 		}
-// 		else
-// 		{
-// 			// Handle a normal word
-// // Gather characters until a space or special character is encountered
-// 			char *start = input;
-//while (*input && !ft_isspace(*input) && *input != '|' && *input != '<' && *input != '>')
-// 				input++;
-// 			int len = input - start;
-// 			new_token->value = ft_substr(start, 0, len);
-// 			new_token->type = T_WORD;
-// 		}
-// 		new_token->next = NULL;
-// 		// Add the new token to the linked list
-// 		if (!head)
-// 		{
-// 			head = new_token;
-// 			current = new_token;
-// 		}
-// 		else
-// 		{
-// 			current->next = new_token;
-// 			current = new_token;
-// 		}
-// 	}
-// 	return (head);
-// }

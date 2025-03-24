@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/20 17:33:59 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/24 14:34:24 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	free_cmd(t_cmd *cmd)
 {
 	t_cmd	*tmp;
-	int	i;
+	int		i;
 
 	while (cmd)
 	{
@@ -31,16 +31,24 @@ void	free_cmd(t_cmd *cmd)
 			free(cmd->args);
 		}
 		if (cmd->quote_type)
+		{
+			i = 0;
+			while (cmd->quote_type[i])
+			{
+				free(cmd->quote_type[i]);
+				i++;
+			}
 			free(cmd->quote_type);
+		}
 		cmd = cmd->next;
 		free(tmp);
 	}
 }
 
 
-void free_tokens(t_token *tokens)
+void	free_tokens(t_token *tokens)
 {
-	t_token *tmp;
+	t_token	*tmp;
 
 	while (tokens)
 	{
@@ -48,6 +56,8 @@ void free_tokens(t_token *tokens)
 		tokens = tokens->next;
 		if (tmp->value)
 			free(tmp->value);
+		if (tmp->qt_array)
+			free(tmp->qt_array);
 		free(tmp);
 	}
 }
@@ -60,9 +70,9 @@ void free_tokens(t_token *tokens)
 * - Frees the shell structure itself.
 */
 
-void free_minishell(t_minishell *shell)
+void	free_minishell(t_minishell *shell)
 {
-	int i;
+	int	i;
 
 	if (!shell)
 		return;
@@ -97,4 +107,8 @@ int	ft_isspace(int c)
 		return (1);
 	}	
 	return (0);
+}
+int	is_operator_char(char c)
+{
+	return (c == '|' || c == '<' || c == '>');
 }
