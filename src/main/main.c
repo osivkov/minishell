@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 14:29:15 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/26 19:01:00 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,6 @@
 #include <bits/sigaction.h>
 #include <limits.h>  // for PATH_MAX
 #include <unistd.h>  // for getcwd
-
-
-volatile	sig_atomic_t g_signal_status = 0;
 
 
 char	*generate_prompt(t_minishell *shell)
@@ -63,6 +60,7 @@ int	run_minishell(t_minishell *shell)
 	while (1)
 	{
 		// Generate the prompt dynamically (e.g., "user@cwd$ ")
+		write(STDOUT_FILENO, "\r\033[K", 4);
 		prompt = generate_prompt(shell);
 		// Read input from the user using the generated prompt
 		input = readline(prompt);
@@ -76,13 +74,18 @@ int	run_minishell(t_minishell *shell)
 		// If the input is not empty, add it to the history
 		if (input[0] != '\0')
 			add_history(input);
+		if (g_exit != 0)
+		{
+			shell->last_exit = g_exit;
+			g_exit = 0;
+		}
 		// LEXER: Convert the input string into a list of tokens
 		tokens = lexer(shell, input);
 		// debug_print_tokens(tokens);
 		
 		// If a lexer error occurs (e.g., unmatched quotes),
 		// shell->last_exit is set to 2 and tokens is NULL
-		if (!tokens && shell->last_exit == 2)
+		if (!tokens && shell->last_exit != 0)
 		{
 			free(input);
 			continue; // Skip parser/execution and prompt for new input
@@ -91,7 +94,7 @@ int	run_minishell(t_minishell *shell)
 		cmd = parser(shell, tokens);
 		// print_cmds(cmd);
 		// If a parser error occurs, free tokens and input, then prompt again
-		if (!cmd && shell->last_exit == 2)
+		if (!cmd && shell->last_exit != 0)
 		{
 			free_tokens(tokens);
 			free(input);
@@ -102,8 +105,9 @@ int	run_minishell(t_minishell *shell)
 		// Here, you can call your (currently simplified) execute function
 		shell->cmd = cmd;
 		if (shell->cmd == NULL)
-			printf("shell-cmd is NULL\n");
+			// printf("shell-cmd is NULL\n");
 		// pseudo_execute(shell);
+		signal(SIGINT, command_handler);
 		execute(shell); 
 		// Free tokens, command list, and input after execution
 		free_tokens(tokens);
@@ -250,7 +254,6 @@ void	run_noninteractive_minishell(t_minishell *shell, char **argv)
 int	main(int argc, char **argv, char **env)
 {
 	t_minishell	*shell;
-	struct sigaction sa;
 	int	exit_status;
 
 	if (argc > 1)
@@ -259,40 +262,33 @@ int	main(int argc, char **argv, char **env)
 		{
 			ft_putendl_fd("Mismatch of arguments", 2);
 			ft_putstr_fd("If you wish to run non-interactive minishell: ", 2);
-			ft_putendl_fd("use the flag \'-c\' followed by commands", 2);
+			ft_putendl_fd("use the flag '-c' followed by commands", 2);
 			ft_putstr_fd("If you wish to interactive minishell: ", 2);
 			ft_putendl_fd("do not provide any arguments", 2);			
 			return (1);
 		}
 		shell = init_minishell(env);
 		if (shell == NULL)
-			return (perror("Initiatlization error"), 1);
+			return (perror("Initialization error"), 1);
 		run_noninteractive_minishell(shell, argv);
 		exit_status = shell->last_exit;
 		free_minishell(shell);
 		return (exit_status);
 	}
 
-	// Set up signal handler for SIGINT (Ctrl-C)
-	sa.sa_handler = handle_sigint;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0; // Restart interrupted syscalls
-	if (sigaction(SIGINT, &sa, NULL) == -1)
-	{
-		perror("sigaction");
-		return (1);
-	}
-	signal(SIGQUIT, SIG_IGN);
-	
+	/* Инициализируем shell и затем устанавливаем обработчики сигналов */
 	shell = init_minishell(env);
 	if (!shell)
 	{
 		perror("Initialization error");
 		return (1);
 	}
-
+	/* Устанавливаем обработчики сигналов через set_signal в режиме STOP_RESTORE */
+	set_signal(STOP_RESTORE, shell);
+	clear_history();
 	run_minishell(shell);
 	exit_status = shell->last_exit;
 	free_minishell(shell);
 	return (exit_status);
 }
+

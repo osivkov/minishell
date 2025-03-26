@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 14:32:21 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/26 18:57:40 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,21 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+static void free_quote_types(int **qtypes, int count)
+{
+	int i;
+
+	if (!qtypes)
+		return;
+	for (i = 0; i < count; i++)
+	{
+		if (qtypes[i])
+		free(qtypes[i]);
+	}
+	free(qtypes);
+}
+
 
 
 static void	free_args_on_error(char **args, int used)
@@ -83,11 +98,17 @@ static int	handle_redirect(t_minishell *shell, t_cmd *cmd,
 	fd = -1;
 	if (rtype == T_HEREDOC)
 	{
+		// set_signal(HEREDOC, shell);
 		fd = handle_heredoc(filename);
+		// set_signal(STOP_RESTORE, shell);
 		if (fd == -1)
+		{
 			return (1);
+		}
+
 		cmd->infile = fd;
 	}
+	
 	else if (rtype == T_REDIR_IN)
 		cmd->infile = open(filename, O_RDONLY);
 	else if (rtype == T_REDIR_OUT)
@@ -117,6 +138,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	int		**qtypes; // Здесь будем хранить указатели на массивы кавычек для каждого аргумента
 	int		i;
 
+	i = 0;
 	cmd = alloc_cmd_struct(shell);
 	if (!cmd)
 		return (NULL);
@@ -133,11 +155,10 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	{
 		free(args);
 		free(cmd);
-		free(qtypes);
+		free_quote_types(qtypes, i);
 		shell->last_exit = 10;
 		return (NULL);
 	}
-	i = 0;
 	/* Обрабатываем все токены до T_PIPE */
 	while (*tokens && (*tokens)->type != T_PIPE)
 	{
@@ -162,7 +183,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 			{
 				ft_putendl_fd("minishell: syntax error near operator", 2);
 				free_args_on_error(args, i);
-				free(qtypes);
+				free_quote_types(qtypes, i);
 				free(cmd);
 				shell->last_exit = 2;
 				return (NULL);
@@ -170,7 +191,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 			if (handle_redirect(shell, cmd, rtype, (*tokens)->value))
 			{
 				free_args_on_error(args, i);
-				free(qtypes);
+				free_quote_types(qtypes, i);
 				free(cmd);
 				return (NULL);
 			}

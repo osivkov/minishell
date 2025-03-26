@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dsewlia <dsewlia@student.42.fr>            +#+  +:+       +#+        */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 09:48:08 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/24 11:34:24 by dsewlia          ###   ########.fr       */
+/*   Updated: 2025/03/26 12:09:50 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,8 @@ int	get_final_path(t_minishell *mini, char **all_path, char *path, \
 	{
 		full_path = ft_strjoin_all(all_path[i], "/", to_find, NULL);
 		if (full_path == NULL)
-		{
-			ft_free_double(all_path, NULL, NULL, NULL);
-			return (free (full_path), ft_malloc_error(mini), ENOMEM);
-		}
+			return (ft_free_double(all_path, NULL, NULL, NULL), \
+				free (full_path), ft_malloc_error(mini), ENOMEM);
 		if (access(full_path, F_OK | X_OK) == 0)
 		{
 			j = -1;
@@ -41,7 +39,8 @@ int	get_final_path(t_minishell *mini, char **all_path, char *path, \
 		}
 	}
 	ft_free_double(all_path, NULL, NULL, NULL);
-	return (free (full_path), ft_error_msg(to_find, NULL, strerror(127)), 127);
+	return (free (full_path), ft_error_msg(to_find, NULL, "command not found"), \
+		127);
 }
 
 /*will return 0 if cmd path is found and wil write it into path

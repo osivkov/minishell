@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dsewlia <dsewlia@student.42.fr>            +#+  +:+       +#+        */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 08:13:52 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/24 10:19:04 by dsewlia          ###   ########.fr       */
+/*   Updated: 2025/03/24 18:48:22 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <termios.h>
 
 /*execute.c*/
 //resets infile and outfile in cmd structs if there is no redirection
@@ -32,13 +33,12 @@ int	handle_inout_fd(t_cmd *head)
 	return (count_cmd);
 }
 
-/*execute.c*/
 //begins execution.
 void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
 {
-	t_cmd	*head;
-	pid_t	pid;
-	int		i;
+	t_cmd			*head;
+	pid_t			pid;
+	int				i;
 
 	head = mini->cmd;
 	i = 0;
@@ -94,16 +94,40 @@ will return the exit status of the command*/
 // 	return (mini->last_exit);
 // }
 
+void	mini_terminal(t_minishell *mini, int count_cmd)
+{
+	int				*fd;
+	// struct termios	term_set;
+
+	// if (tcgetattr(STDIN_FILENO, &term_set) == -1)
+	// {
+	// 	perror("tcgetattr error");
+	// 	free_minishell(mini);
+	// 	exit (1);
+	// }
+	fd = create_pipes(mini, count_cmd);
+	if (fd != NULL)
+	{
+		initiate_execute(mini, fd, count_cmd);
+		free (fd);
+	}
+// 	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_set) == -1)
+// 	{
+// 		perror("tcsettr error");
+// 		free_minishell(mini);
+// 		exit (1);
+// 	}
+}
+
 /*execute.c*/
 /*will execute all commands in mini->cmd, will set last_exit
 will free cmd and args in cmd and then return*/
 void	execute(t_minishell *mini)
 {
 	int		count_cmd;
-	int		*fd;
+
 
 	count_cmd = handle_inout_fd(mini->cmd);
-	fd = NULL;
 	if (count_cmd == 0)
 		return ;
 	if (count_cmd == 1 && check_builtin(mini->cmd) == 0)
@@ -111,11 +135,6 @@ void	execute(t_minishell *mini)
 		mini->last_exit = begin_builtin(mini, mini->cmd);
 		return ;
 	}
-	fd = create_pipes(mini, count_cmd);
-	if (fd != NULL)
-	{
-		initiate_execute(mini, fd, count_cmd);
-		free (fd);
-	}
+	mini_terminal(mini, count_cmd);
 	return ;
 }

@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 14:54:31 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/26 18:53:59 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,19 @@
 #endif
 
 
+#ifndef SIGNALS_H
+#define SIGNALS_H
+
+/* Режимы для set_signal */
+#define STOP_RESTORE   1
+#define STOP_QUIT      2
+#define EXIT_MODE      3
+#define HEREDOC        4
+#define HEREDOC_PAUSE  5
+
+/* Прототипы новых обработчиков сигналов */
+#endif
+
 
 
 #include <signal.h>
@@ -32,6 +45,7 @@
 #include <linux/limits.h>
 #include <sys/wait.h>
 #include "../libft/libft.h"
+#include <signal.h>
 // Include other standard libraries as needed
 
 /**
@@ -90,7 +104,7 @@ typedef struct s_cmd {
 }	t_cmd;
 
 /* Global variable for signal handling (only one is allowed) */
-extern volatile sig_atomic_t g_signal_status;
+extern volatile sig_atomic_t g_exit;
 void	handle_sigint(int sig);
 
 /* Main Shell structure */
@@ -105,6 +119,15 @@ typedef struct s_minishell {
 	int		last_exit;	// Last command exit status
 	// Additional fields can be added here (e.g., history, configuration settings, etc.)
 }	t_minishell;
+void	signal_handler(int signum);
+void	command_handler(int signum);
+void	heredoc_sigint_handler(int sig);
+void child_signal_handler(int sig);
+void	check_signals(void);
+void	ctrl_c(int sig);
+void	back_slash(int sig);
+void	reset_prompt(int sig);
+void	set_signal(int mode, t_minishell *shell);
 
 int		ft_set_env_var(t_minishell *mini, char *key, char *ans);
 int		ft_malloc_error(t_minishell *mini);
@@ -121,6 +144,18 @@ t_cmd 		*parser(t_minishell *shell, t_token *tokens);
 t_token 	*process_quotes(t_minishell *shell, char **input, char quote_char);
 int			handle_heredoc(char *delimeter);
 /*list lexer_utils functions*/
+int	handle_dollar_quote(t_minishell *shell,
+	char **input, char **value, int **qt);
+int	handle_single_quote(t_minishell *shell,
+	char **input, char **value, int **qt);
+int	handle_double_quote(t_minishell *shell,
+	char **input, char **value, int **qt);
+int	handle_unquoted_char(t_minishell *shell,
+	char **input, char **value, int **qt);
+int	process_chars(t_minishell *shell, char **input,
+	char **value, int **quote_type);
+int	process_chars(t_minishell *shell, char **input, char **value, int **quote_type);
+char	*build_word_value(t_minishell *shell, char **input, int **out_qt);
 int		append_char(char **str, int **qt, char c, int qtype);
 void	token_to_list(t_token **head, t_token **current, t_token *new_token);
 t_token	*create_double_operator_token(char **input);

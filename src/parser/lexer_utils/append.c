@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 14:52:54 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 14:53:53 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/25 18:21:28 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,4 +68,52 @@ int	append_char(char **str, int **qt, char c, int qtype)
 	*str = new_str;
 	*qt = new_qt;
 	return (0);
+}
+
+int	process_chars(t_minishell *shell, char **input,
+	char **value, int **quote_type)
+{
+	while (**input && !ft_isspace(**input) && !is_operator_char(**input))
+	{
+		if (**input == '\'')
+		{
+			if (handle_single_quote(shell, input, value, quote_type) < 0)
+				return (-1);
+		}
+		else if (**input == '\"')
+		{
+			if (handle_double_quote(shell, input, value, quote_type) < 0)
+				return (-1);
+		}
+		else
+		{
+			if (handle_unquoted_char(shell, input, value, quote_type) < 0)
+				return (-1);
+		}
+	}
+	return (0);
+}
+
+char	*build_word_value(t_minishell *shell, char **input, int **out_qt)
+{
+	char	*value;
+	int		*quote_type;
+
+	value = NULL;
+	quote_type = NULL;
+	if (**input == '$' && ((*input)[1] == '\'' || (*input)[1] == '\"'))
+	{
+		if (handle_dollar_quote(shell, input, &value, &quote_type) < 0)
+			return (NULL);
+	}
+	if (process_chars(shell, input, &value, &quote_type) < 0)
+	{
+		free(value);
+		free(quote_type);
+		return (NULL);
+	}
+	if (!value)
+		return (NULL);
+	*out_qt = quote_type;
+	return (value);
 }

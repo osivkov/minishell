@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 12:25:31 by osivkov           #+#    #+#             */
-/*   Updated: 2024/10/11 12:31:43 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/25 09:35:03 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,7 @@ char	*ft_itoa(int n)
 	str[len] = '\0';
 	if (num == 0)
 	{
-		str[0] = '0';
-		return (str);
+		return (str[0] = '0', str);
 	}
 	if (num < 0)
 	{

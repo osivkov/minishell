@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 10:50:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 14:30:33 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/24 15:03:21 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,5 +91,3 @@ t_token	*create_special_token(char **input)
 	else
 		return (create_single_operator_token(input));
 }
-
-
