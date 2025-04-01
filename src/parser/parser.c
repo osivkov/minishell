@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/26 18:57:40 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/28 18:54:22 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,17 +98,15 @@ static int	handle_redirect(t_minishell *shell, t_cmd *cmd,
 	fd = -1;
 	if (rtype == T_HEREDOC)
 	{
-		// set_signal(HEREDOC, shell);
+		
+		
 		fd = handle_heredoc(filename);
-		// set_signal(STOP_RESTORE, shell);
 		if (fd == -1)
 		{
 			return (1);
 		}
-
 		cmd->infile = fd;
 	}
-	
 	else if (rtype == T_REDIR_IN)
 		cmd->infile = open(filename, O_RDONLY);
 	else if (rtype == T_REDIR_OUT)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dsewlia <dsewlia@student.42.fr>            +#+  +:+       +#+        */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 09:50:06 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/24 10:23:43 by dsewlia          ###   ########.fr       */
+/*   Updated: 2025/03/28 17:44:00 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ void	ft_kill_child(t_minishell *mini, int count_cmd)
 		if (WIFEXITED(status))
 			mini->last_exit = WEXITSTATUS(status);
 		else if (WIFSIGNALED(status))
-		{
 			mini->last_exit = 128 + WTERMSIG(status);
-		}
+		if (mini->last_exit == 131)
+			printf("Quit (core dumped)\n");
 		i++;
 	}
 }
@@ -83,12 +83,19 @@ void	ft_handle_outfile(int *fd, t_cmd *head, int i)
 }
 
 //initiates child process
-void	ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i)
+void ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i)
 {
-	int		count_cmd;
-	t_cmd	*temp;
-	int		j;
+	int count_cmd;
+	t_cmd *temp;
+	int j;
 
+	// Восстановление стандартных обработчиков сигналов для дочернего процесса:
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
+
+	// Настраиваем дескрипторы ввода/вывода
+	ft_handle_infile(fd, head, i);
+	ft_handle_outfile(fd, head, i);
 	temp = mini->cmd;
 	count_cmd = 0;
 	while (temp != NULL)
@@ -96,12 +103,11 @@ void	ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i)
 		count_cmd++;
 		temp = temp->next;
 	}
-	ft_handle_infile(fd, head, i);
-	ft_handle_outfile(fd, head, i);
 	j = -1;
 	while (++j < (2 * count_cmd))
 		close(fd[j]);
-	begin_builtin(mini, head);
+    // Запуск команды (либо execve для внешних, либо встроенная функция)
+    begin_builtin(mini, head);
 }
 
 /*creates pipes for communication

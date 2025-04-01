@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/26 19:01:00 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/28 17:35:57 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ int	run_minishell(t_minishell *shell)
 		if (shell->cmd == NULL)
 			// printf("shell-cmd is NULL\n");
 		// pseudo_execute(shell);
-		signal(SIGINT, command_handler);
+		set_signal(STOP_RESTORE, shell);
 		execute(shell); 
 		// Free tokens, command list, and input after execution
 		free_tokens(tokens);

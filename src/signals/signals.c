@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/26 17:53:37 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/26 19:18:02 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/28 18:45:10 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ void child_signal_handler(int sig)
 		dup2(dev_null_fd, STDIN_FILENO);
 		close(dev_null_fd);
 		printf("\n");
-		rl_on_new_line();
-		rl_replace_line("", 0);
+		// rl_on_new_line();
+		// rl_replace_line("", 0);
         g_exit = 130;
         }
 }
@@ -109,6 +109,7 @@ void set_signal(int mode, t_minishell *shell)
     {
         // Можно установить другой обработчик, если нужно
         signal(SIGINT, child_signal_handler);
+        signal(SIGQUIT, SIG_DFL);
     }
 }
 

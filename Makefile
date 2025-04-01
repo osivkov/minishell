@@ -3,7 +3,7 @@ NAME = minishell
 
 # Compiler and compiler flags
 CC = cc
-CFLAGS = -Wall -Wextra -Werror #-fPIE
+CFLAGS = -Wall -Wextra -Werror   #-fPIE
 
 # Directories for source files, headers, and object files
 SRC_DIR = src
