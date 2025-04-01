@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:32 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/28 17:52:00 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 11:47:59 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,28 +17,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-static void free_quote_types(int **qtypes, int count)
-{
-	int i;
-
-	if (!qtypes)
-		return;
-	for (i = 0; i < count; i++)
-	{
-		if (qtypes[i])
-		free(qtypes[i]);
-	}
-	free(qtypes);
-}
-
-
-
-static void	free_args_on_error(char **args, int used)
-{
-	while (--used >= 0)
-		free(args[used]);
-	free(args);
-}
 
 static t_cmd	*alloc_cmd_struct(t_minishell *shell)
 {
@@ -47,7 +25,7 @@ static t_cmd	*alloc_cmd_struct(t_minishell *shell)
 	cmd = malloc(sizeof(t_cmd));
 	if (!cmd)
 	{
-		shell->last_exit = 2;
+		shell->last_exit = 1;
 		ft_putendl_fd("minishell: allocation error", 2);
 		return (NULL);
 	}
@@ -132,7 +110,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	t_cmd	*cmd;
 	int		arg_count;
 	char	**args;
-	int		**qtypes; // Здесь будем хранить указатели на массивы кавычек для каждого аргумента
+	int		**qtypes;		/* Массив указателей на qt_array для каждого аргумента */
 	int		i;
 
 	i = 0;
@@ -141,40 +119,45 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 		return (NULL);
 	arg_count = count_args(shell, *tokens);
 	if (arg_count < 0)
-		return (free(cmd), NULL);
-	// Выделяем память для массива аргументов
+	{
+		free(cmd);
+		return (NULL);
+	}
+	/* Выделяем память для массива аргументов */
 	args = malloc(sizeof(char *) * (arg_count + 1));
 	if (!args)
-		return (free(cmd), shell->last_exit = 2, NULL);
-	// Выделяем память для массива указателей на qt_array для каждого аргумента
+	{
+		ft_putendl_fd("minishell: syntax error: empty command", 2);
+		shell->last_exit = 2;
+		free(cmd);
+		return (NULL);
+	}
+	/* Выделяем память для массива указателей на qt_array */
 	qtypes = malloc(sizeof(int *) * (arg_count + 1));
 	if (!qtypes)
 	{
+		ft_putendl_fd("minishell: malloc error", 2);
 		free(args);
 		free(cmd);
-		free_quote_types(qtypes, i);
-		shell->last_exit = 10;
+		shell->last_exit = 1;
 		return (NULL);
 	}
-	/* Обрабатываем все токены до T_PIPE */
+	/* Обрабатываем токены до T_PIPE */
 	while (*tokens && (*tokens)->type != T_PIPE)
 	{
 		if ((*tokens)->type == T_WORD)
-	{
-    	// Дублируем значение токена
-    	args[i] = ft_strdup((*tokens)->value);
-    	// Переносим указатель на массив с информацией о кавычках
-    	qtypes[i] = (*tokens)->qt_array;
-    	// Обнуляем qt_array в токене, чтобы избежать двойного освобождения
-    	(*tokens)->qt_array = NULL;
-    	i++;
-    	*tokens = (*tokens)->next;
-	}
-		else if ((*tokens)->type == T_REDIR_IN || (*tokens)->type == T_REDIR_OUT
-			|| (*tokens)->type == T_REDIR_APPEND || (*tokens)->type == T_HEREDOC)
+		{
+			args[i] = ft_strdup((*tokens)->value);
+			/* Передаём владение qt_array и обнуляем поле токена */
+			qtypes[i] = (*tokens)->qt_array;
+			(*tokens)->qt_array = NULL;
+			i++;
+			*tokens = (*tokens)->next;
+		}
+		else if ((*tokens)->type == T_REDIR_IN || (*tokens)->type == T_REDIR_OUT ||
+				 (*tokens)->type == T_REDIR_APPEND || (*tokens)->type == T_HEREDOC)
 		{
 			t_token_type	rtype = (*tokens)->type;
-
 			*tokens = (*tokens)->next;
 			if (!(*tokens) || (*tokens)->type != T_WORD)
 			{
@@ -195,7 +178,7 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 			*tokens = (*tokens)->next;
 		}
 		else
-			break ;
+			break;
 	}
 	args[i] = NULL;
 	qtypes[i] = NULL;
@@ -203,6 +186,8 @@ static t_cmd	*parse_command(t_minishell *shell, t_token **tokens)
 	cmd->quote_type = qtypes;
 	return (cmd);
 }
+
+
 
 
 /*

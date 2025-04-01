@@ -6,11 +6,37 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 10:35:52 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 11:14:14 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+
+void	free_quote_types(int **qtypes, int count)
+{
+	int	i;
+
+	i = 0;
+	if (!qtypes)
+		return;
+	while (i < count)
+	{
+		if (qtypes[i])
+			free(qtypes[i]);
+		i++;
+	}
+	free(qtypes);
+}
+
+
+
+void	free_args_on_error(char **args, int used)
+{
+	while (--used >= 0)
+		free(args[used]);
+	free(args);
+}
 
 void	free_cmd(t_cmd *cmd)
 {
@@ -32,12 +58,19 @@ void	free_cmd(t_cmd *cmd)
 		}
 		if (cmd->quote_type)
 		{
+			i = 0;
+			while (cmd->quote_type[i] != NULL)
+			{
+				free(cmd->quote_type[i]);
+				i++;
+			}
 			free(cmd->quote_type);
 		}
 		cmd = cmd->next;
 		free(tmp);
 	}
 }
+
 
 void	free_tokens(t_token *tokens)
 {
@@ -85,22 +118,3 @@ void	free_minishell(t_minishell *shell)
 	free(shell);
 }
 
-int	ft_isspace(int c)
-{
-	if (c == ' '
-		|| c == '\t'
-		|| c == '\n'
-		|| c == '\v'
-		|| c == '\f'
-		|| c == '\f'
-		|| c == '\r')
-	{
-		return (1);
-	}
-	return (0);
-}
-
-int	is_operator_char(char c)
-{
-	return (c == '|' || c == '<' || c == '>');
-}

@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 09:50:06 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/28 17:44:00 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 11:03:23 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,17 +83,14 @@ void	ft_handle_outfile(int *fd, t_cmd *head, int i)
 }
 
 //initiates child process
-void ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i)
+void	ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i)
 {
-	int count_cmd;
-	t_cmd *temp;
-	int j;
+	int		count_cmd;
+	t_cmd	*temp;
+	int		j;
 
-	// Восстановление стандартных обработчиков сигналов для дочернего процесса:
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
-
-	// Настраиваем дескрипторы ввода/вывода
 	ft_handle_infile(fd, head, i);
 	ft_handle_outfile(fd, head, i);
 	temp = mini->cmd;
@@ -106,8 +103,7 @@ void ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i)
 	j = -1;
 	while (++j < (2 * count_cmd))
 		close(fd[j]);
-    // Запуск команды (либо execve для внешних, либо встроенная функция)
-    begin_builtin(mini, head);
+	begin_builtin(mini, head);
 }
 
 /*creates pipes for communication

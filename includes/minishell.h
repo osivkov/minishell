@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/26 18:53:59 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 11:14:06 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,6 @@ char	*get_env_value(t_minishell *shell, const char *var);
 int			is_operator_char(char c);
 t_token		*lexer(t_minishell *shell, char *input);
 t_cmd 		*parser(t_minishell *shell, t_token *tokens);
-t_token 	*process_quotes(t_minishell *shell, char **input, char quote_char);
 int			handle_heredoc(char *delimeter);
 /*list lexer_utils functions*/
 int	handle_dollar_quote(t_minishell *shell,
@@ -176,7 +175,8 @@ int			run_minishell(t_minishell *shell);
 void		free_minishell(t_minishell *shell);
 void 		free_cmd(t_cmd *cmd);
 void 		free_tokens(t_token *tokens);
-
+void		free_args_on_error(char **args, int used);
+void		free_quote_types(int **qtypes, int count);
 /*Function for utils*/
 int			ft_isspace(int c);
 

@@ -17,6 +17,7 @@ LIBFT = $(LIBFT_DIR)/libft.a
 # List of project source files
 SRCS = $(SRC_DIR)/main/main.c \
 		$(SRC_DIR)/utils/utils.c \
+		$(SRC_DIR)/utils/utils_extra.c \
 		$(SRC_DIR)/parser/lexer.c \
 		$(SRC_DIR)/parser/parser.c \
 		$(SRC_DIR)/parser/lexer_utils/lexer_utils.c\
