@@ -6,19 +6,17 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/28 17:35:57 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 17:48:17 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include <readline/readline.h>
 #include <readline/history.h>
-// #define _POSIX_C_SOURCE 200809L
-// #define _XOPEN_SOURCE 700
 #include <signal.h>
 #include <bits/sigaction.h>
-#include <limits.h>  // for PATH_MAX
-#include <unistd.h>  // for getcwd
+#include <limits.h>
+#include <unistd.h>
 
 
 char	*generate_prompt(t_minishell *shell)
@@ -59,19 +57,15 @@ int	run_minishell(t_minishell *shell)
 
 	while (1)
 	{
-		// Generate the prompt dynamically (e.g., "user@cwd$ ")
 		write(STDOUT_FILENO, "\r\033[K", 4);
 		prompt = generate_prompt(shell);
-		// Read input from the user using the generated prompt
 		input = readline(prompt);
 		free(prompt);
 		if (!input)
 		{
-			// If readline returns NULL, it indicates EOF (e.g., Ctrl+D)
 			ft_putstr_fd("exit\n", 1);
 			break;
 		}
-		// If the input is not empty, add it to the history
 		if (input[0] != '\0')
 			add_history(input);
 		if (g_exit != 0)
@@ -79,37 +73,23 @@ int	run_minishell(t_minishell *shell)
 			shell->last_exit = g_exit;
 			g_exit = 0;
 		}
-		// LEXER: Convert the input string into a list of tokens
 		tokens = lexer(shell, input);
-		// debug_print_tokens(tokens);
-		
-		// If a lexer error occurs (e.g., unmatched quotes),
-		// shell->last_exit is set to 2 and tokens is NULL
 		if (!tokens && shell->last_exit != 0)
 		{
 			free(input);
-			continue; // Skip parser/execution and prompt for new input
+			continue; 
 		}
-		// PARSER: Build a command list (t_cmd) from the token list
 		cmd = parser(shell, tokens);
-		// print_cmds(cmd);
-		// If a parser error occurs, free tokens and input, then prompt again
 		if (!cmd && shell->last_exit != 0)
 		{
 			free_tokens(tokens);
 			free(input);
 			continue;
 		}
-		// Expand environment variables in all command arguments
 		expand_command_variables(shell, cmd);
-		// Here, you can call your (currently simplified) execute function
 		shell->cmd = cmd;
-		if (shell->cmd == NULL)
-			// printf("shell-cmd is NULL\n");
-		// pseudo_execute(shell);
 		set_signal(STOP_RESTORE, shell);
 		execute(shell); 
-		// Free tokens, command list, and input after execution
 		free_tokens(tokens);
 		tokens = NULL;
 		shell->tokens = NULL;
@@ -117,7 +97,6 @@ int	run_minishell(t_minishell *shell)
 		cmd = NULL;
 		shell->cmd = NULL;
 		free(input);
-		// free(prompt);
 	}
 	return (0);
 }
@@ -164,13 +143,9 @@ t_minishell *init_minishell(char **env)
 	shell = (t_minishell *)malloc(sizeof(t_minishell));
 	if (!shell)
 		return (NULL);
-	
-	/* Count the environment variables */
 	env_count = 0;
 	while (env[env_count])
 		env_count++;
-
-	/* Allocate memory for a copy of the environment */
 	shell->env = (char **)malloc(sizeof(char *) * (env_count + 1));
 	if (!shell->env)
 	{
@@ -275,15 +250,9 @@ int	main(int argc, char **argv, char **env)
 		free_minishell(shell);
 		return (exit_status);
 	}
-
-	/* Инициализируем shell и затем устанавливаем обработчики сигналов */
 	shell = init_minishell(env);
 	if (!shell)
-	{
-		perror("Initialization error");
-		return (1);
-	}
-	/* Устанавливаем обработчики сигналов через set_signal в режиме STOP_RESTORE */
+		return (perror("Initialization error"), 1);
 	set_signal(STOP_RESTORE, shell);
 	clear_history();
 	run_minishell(shell);

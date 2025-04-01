@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 13:42:44 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 11:38:11 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 17:28:20 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ int	handle_single_quote(t_minishell *shell,
 	}
 	if (**input != '\'')
 	{
-		ft_putendl_fd("minishell: syntax error: missing closing single quote", 2);
+		ft_putendl_fd("minishell: syntax error:"
+			"missing closing single quote", 2);
 		shell->last_exit = 2;
 		return (-1);
 	}
@@ -74,7 +75,8 @@ int	handle_double_quote(t_minishell *shell,
 	}
 	if (**input != '\"')
 	{
-		ft_putendl_fd("minishell: syntax error: missing closing double quote", 2);
+		ft_putendl_fd("minishell: syntax error: missing"
+			"closing double quote", 2);
 		shell->last_exit = 2;
 		return (-1);
 	}

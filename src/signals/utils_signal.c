@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/01 10:38:47 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 10:39:12 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 14:46:14 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ void	signal_handler(int signum)
 {
 	if (signum == SIGINT)
 	{
+		rl_done = 1;
+		rl_cleanup_after_signal();
 		printf("\n");
 		rl_on_new_line();
 		rl_replace_line("", 0);

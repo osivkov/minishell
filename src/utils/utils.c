@@ -6,12 +6,11 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 11:14:14 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 17:44:14 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
 
 void	free_quote_types(int **qtypes, int count)
 {
@@ -19,7 +18,7 @@ void	free_quote_types(int **qtypes, int count)
 
 	i = 0;
 	if (!qtypes)
-		return;
+		return ;
 	while (i < count)
 	{
 		if (qtypes[i])
@@ -28,8 +27,6 @@ void	free_quote_types(int **qtypes, int count)
 	}
 	free(qtypes);
 }
-
-
 
 void	free_args_on_error(char **args, int used)
 {
@@ -50,27 +47,20 @@ void	free_cmd(t_cmd *cmd)
 		{
 			i = 0;
 			while (cmd->args[i])
-			{
-				free(cmd->args[i]);
-				i++;
-			}
+				free(cmd->args[i++]);
 			free(cmd->args);
 		}
 		if (cmd->quote_type)
 		{
 			i = 0;
 			while (cmd->quote_type[i] != NULL)
-			{
-				free(cmd->quote_type[i]);
-				i++;
-			}
+				free(cmd->quote_type[i++]);
 			free(cmd->quote_type);
 		}
 		cmd = cmd->next;
 		free(tmp);
 	}
 }
-
 
 void	free_tokens(t_token *tokens)
 {
@@ -117,4 +107,3 @@ void	free_minishell(t_minishell *shell)
 		free_cmd(shell->cmd);
 	free(shell);
 }
-

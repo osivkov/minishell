@@ -20,6 +20,8 @@ SRCS = $(SRC_DIR)/main/main.c \
 		$(SRC_DIR)/utils/utils_extra.c \
 		$(SRC_DIR)/parser/lexer.c \
 		$(SRC_DIR)/parser/parser.c \
+		$(SRC_DIR)/parser/pars_pipline.c \
+		$(SRC_DIR)/parser/parser_utils/parser_utils.c \
 		$(SRC_DIR)/parser/lexer_utils/lexer_utils.c\
 		$(SRC_DIR)/parser/lexer_utils/word_token.c\
 		$(SRC_DIR)/parser/lexer_utils/append.c\

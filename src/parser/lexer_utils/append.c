@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 14:52:54 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 11:19:31 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 17:27:57 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,6 @@ int	append_char(char **str, int **qt, char c, int qtype)
 	*qt = new_qt;
 	return (0);
 }
-
 
 int	process_chars(t_minishell *shell, char **input,
 	char **value, int **quote_type)

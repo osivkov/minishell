@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 11:14:06 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 18:24:23 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,24 +16,20 @@
 
 
 #ifndef PATH_MAX
-#define PATH_MAX 4096 
+#define PATH_MAX 4096
 #endif
 
 
 #ifndef SIGNALS_H
 #define SIGNALS_H
 
-/* Режимы для set_signal */
-#define STOP_RESTORE   1
-#define STOP_QUIT      2
-#define EXIT_MODE      3
-#define HEREDOC        4
-#define HEREDOC_PAUSE  5
+#define STOP_RESTORE	1
+#define STOP_QUIT		2
+#define EXIT_MODE		3
+#define HEREDOC			4
+#define HEREDOC_PAUSE	5
 
-/* Прототипы новых обработчиков сигналов */
 #endif
-
-
 
 #include <signal.h>
 #include <stdio.h>
@@ -65,11 +61,6 @@ typedef enum	e_token_type {
 	T_HEREDOC		// Symbol <<
 } t_token_type;
 
-// typedef	enum e_quote_type {
-// 	SINGLE_QUOTE,
-// 	DOUBLE_QUOTE
-// }	t_quote_type;
-
 typedef enum	e_parse_err {
 	PARSE_OK,
 	PARSE_HEREDOC_ERROR,
@@ -86,13 +77,8 @@ typedef struct s_token {
 	int				type;   // Token type (e.g., COMMAND, ARGUMENT, PIPE, REDIRECT)
 	int				*qt_array;
 	struct s_token	*next;  // Pointer to the next token in the list
-} t_token;
+}	t_token;
 
-/* Command structure */
-/* This structure represents a command to be executed.
-	It contains an array of arguments, redirection descriptors, and a flag
-	indicating if it is a built-in command. The 'next' pointer allows the chaining
-	of commands when using pipes. */
 typedef struct s_cmd {
 	char	**args;		// Argument array (first element is the command)
 	int		infile;		// File descriptor for input redirection
@@ -100,29 +86,45 @@ typedef struct s_cmd {
 	int		is_builtin;
 	int		**quote_type;
 	// int		parsing_error;// Flag indicating whether the command is built-in
-	struct s_cmd	*next;		// Next command in the pipeline (if using pipes)
+	struct s_cmd	*next; // Next command in the pipeline (if using pipes)
 }	t_cmd;
 
-/* Global variable for signal handling (only one is allowed) */
-extern volatile sig_atomic_t g_exit;
-void	handle_sigint(int sig);
 
-/* Main Shell structure */
-/* This structure holds the global state of the minishell.
-	It includes the environment variables, the token list and the command list
-	parsed from the input, as well as the last exit status of a command.
-	Additional fields (such as command history, settings, etc.) can be added later. */
+extern volatile sig_atomic_t	g_exit;
+
 typedef struct s_minishell {
 	char	**env;		// Array of environment variables
 	t_token *tokens;		// List of tokens generated from the latest input
 	t_cmd	*cmd;		// List of commands parsed from the tokens
 	int		last_exit;	// Last command exit status
-	// Additional fields can be added here (e.g., history, configuration settings, etc.)
 }	t_minishell;
+
+typedef struct s_parse_context {
+	t_minishell	*shell;
+	t_cmd		*cmd;
+	t_token		**tokens;
+	char		**args;
+	int			**qtypes;
+	int			i;
+}				t_parse_context;
+
+typedef struct s_heredoc_context {
+	int		backup_fd;
+	int		temp_fd;
+	void	(*old_handler)(int);
+}				t_heredoc_context;
+
+t_token		*lexer(t_minishell *shell, char *inputs);
+t_token		*create_double_operator_token(char **input);
+t_token		*create_single_operator_token(char **input);
+t_token		*create_special_token(char **input);
+t_token		*create_word_token(t_minishell *shel, char **input);
+
+
 void	signal_handler(int signum);
 void	command_handler(int signum);
 void	heredoc_sigint_handler(int sig);
-void child_signal_handler(int sig);
+void	child_signal_handler(int sig);
 void	check_signals(void);
 void	ctrl_c(int sig);
 void	back_slash(int sig);
@@ -135,33 +137,37 @@ void	execute(t_minishell *mini);
 void	pseudo_execute(t_minishell *mini);
 void	expand_command_variables(t_minishell *shell, t_cmd *cmd_list);
 char	*get_env_value(t_minishell *shell, const char *var);
-/* Function prototypes for parsing */
-
 
 int			is_operator_char(char c);
-t_token		*lexer(t_minishell *shell, char *input);
-t_cmd 		*parser(t_minishell *shell, t_token *tokens);
+
+t_cmd		*parser(t_minishell *shell, t_token *tokens);
 int			handle_heredoc(char *delimeter);
-/*list lexer_utils functions*/
+
+int	is_redirection(t_token_type type);
+int	allocate_args(t_minishell *shell, int arg_count, char ***args, int ***qtypes);
+t_cmd	*parse_command(t_minishell *shell, t_token **tokens);
+void	add_cmd_to_pipeline(t_cmd **cmd_list, t_cmd **current_cmd,
+		t_cmd *new_cmd);
+t_cmd	*parse_pipeline(t_minishell *shell, t_token **tokens);
+int	count_args(t_minishell *shell, t_token *runner);
+int	validate_and_skip_redirection(t_minishell *shell, t_token **runner);
+int	handle_redirect(t_minishell *shell, t_cmd *cmd,
+	t_token_type rtype, char *filename);
+t_cmd	*alloc_cmd_struct(t_minishell *shell);
 int	handle_dollar_quote(t_minishell *shell,
-	char **input, char **value, int **qt);
+		char **input, char **value, int **qt);
 int	handle_single_quote(t_minishell *shell,
-	char **input, char **value, int **qt);
+		char **input, char **value, int **qt);
 int	handle_double_quote(t_minishell *shell,
-	char **input, char **value, int **qt);
+		char **input, char **value, int **qt);
 int	handle_unquoted_char(t_minishell *shell,
-	char **input, char **value, int **qt);
+		char **input, char **value, int **qt);
 int	process_chars(t_minishell *shell, char **input,
-	char **value, int **quote_type);
+		char **value, int **quote_type);
 int	process_chars(t_minishell *shell, char **input, char **value, int **quote_type);
 char	*build_word_value(t_minishell *shell, char **input, int **out_qt);
 int		append_char(char **str, int **qt, char c, int qtype);
 void	token_to_list(t_token **head, t_token **current, t_token *new_token);
-t_token	*create_double_operator_token(char **input);
-t_token	*create_single_operator_token(char **input);
-t_token	*create_special_token(char **input);
-t_token	*create_word_token(t_minishell *shel,char **input);
-// char	**expand_variables(char **args);
 /*For expand*/
 char	*h_d(t_minishell *shell, const char *str,char *exp, size_t *i);
 char	*hane_dol_var(t_minishell *shell, const char *str, size_t *i, char *exp);
@@ -184,40 +190,40 @@ int			ft_isspace(int c);
 void	run_noninteractive_minishell(t_minishell *shell, char **argv);
 
 /*Function for executor*/
-size_t	strlen_alt(const char *s);
-void	ft_free_single(char *s1, char *s2, char *s3, char *s4);
-void	ft_free_double(char **s1, char **s2, char **s3, char **s4);
-char	*ft_strjoin_all(const char *s1, const char *s2, const char *s3, const char *s4);
-int	ft_malloc_error(t_minishell *mini);
-void	ft_error_msg(char *command, char *key, char *error_msg);
-int	ft_check_env_name(char *name);
-char	*ft_get_env_var(t_minishell *mini, char *key);
-int	ft_realloc_env(t_minishell *mini, char *temp2);
-int	ft_set_env_var(t_minishell *mini, char *key, char *ans);
-int	ft_cd_utils(t_minishell *mini, t_cmd *head, char *path, char *pwd);
-int	ft_cd(t_minishell *mini, t_cmd *head);
-int	ft_echo(t_minishell *mini, t_cmd *head, int new_line, int j);
-int	ft_env(t_minishell *mini, t_cmd *head);
-int	ft_pwd(t_minishell *mini, t_cmd *head);
-int	ft_export_util(t_minishell *mini, char *str, int i);
-int	ft_export_util_2(t_minishell *mini);
-int	ft_export(t_minishell *mini, t_cmd *head);
-int	ft_unset_utils(t_minishell *mini, char *key);
-int	ft_unset(t_minishell *mini, t_cmd *head);
-int	ft_exit(t_minishell *mini, t_cmd *head);
-int	get_final_path(t_minishell *mini, char **all_path, char *path, \
-	char *to_find);
-int	get_cmd_path(t_minishell *mini, char *to_find, char *path);
-int	ft_sys_builtin(t_minishell *mini, t_cmd *head);
-int	begin_builtin(t_minishell *mini, t_cmd *head);
-int		check_builtin(t_cmd *head);
-void	ft_kill_child(t_minishell *mini, int count_cmd);
-void	ft_handle_infile(int *fd, t_cmd *head, int i);
-void	ft_handle_outfile(int *fd, t_cmd *head, int i);
-void	ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i);
-int	*create_pipes(t_minishell *mini, int count_cmd);
-int	handle_inout_fd(t_cmd *head);
-void	initiate_execute(t_minishell *mini, int *fd, int count_cmd);
-void	execute(t_minishell *mini);
+size_t		strlen_alt(const char *s);
+void		ft_free_single(char *s1, char *s2, char *s3, char *s4);
+void		ft_free_double(char **s1, char **s2, char **s3, char **s4);
+char		*ft_strjoin_all(const char *s1, const char *s2, const char *s3, const char *s4);
+int			ft_malloc_error(t_minishell *mini);
+void		ft_error_msg(char *command, char *key, char *error_msg);
+int			ft_check_env_name(char *name);
+char		*ft_get_env_var(t_minishell *mini, char *key);
+int			ft_realloc_env(t_minishell *mini, char *temp2);
+int			ft_set_env_var(t_minishell *mini, char *key, char *ans);
+int			ft_cd_utils(t_minishell *mini, t_cmd *head, char *path, char *pwd);
+int			ft_cd(t_minishell *mini, t_cmd *head);
+int			ft_echo(t_minishell *mini, t_cmd *head, int new_line, int j);
+int			ft_env(t_minishell *mini, t_cmd *head);
+int			ft_pwd(t_minishell *mini, t_cmd *head);
+int			ft_export_util(t_minishell *mini, char *str, int i);
+int			ft_export_util_2(t_minishell *mini);
+int			ft_export(t_minishell *mini, t_cmd *head);
+int			ft_unset_utils(t_minishell *mini, char *key);
+int			ft_unset(t_minishell *mini, t_cmd *head);
+int			ft_exit(t_minishell *mini, t_cmd *head);
+int			get_final_path(t_minishell *mini, char **all_path, char *path,
+			char *to_find);
+int			get_cmd_path(t_minishell *mini, char *to_find, char *path);
+int			ft_sys_builtin(t_minishell *mini, t_cmd *head);
+int			begin_builtin(t_minishell *mini, t_cmd *head);
+int			check_builtin(t_cmd *head);
+void		ft_kill_child(t_minishell *mini, int count_cmd);
+void		ft_handle_infile(int *fd, t_cmd *head, int i);
+void		ft_handle_outfile(int *fd, t_cmd *head, int i);
+void		ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i);
+int			*create_pipes(t_minishell *mini, int count_cmd);
+int			handle_inout_fd(t_cmd *head);
+void		initiate_execute(t_minishell *mini, int *fd, int count_cmd);
+void		execute(t_minishell *mini);
 
 #endif

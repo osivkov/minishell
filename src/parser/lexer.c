@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 10:21:28 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 14:29:52 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 18:06:15 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static t_token	*get_next_token(t_minishell *shell, char **input)
 	return (new_token);
 }
 
-t_token	*lexer(t_minishell *shell, char *input)
+t_token	*lexer(t_minishell *shell, char *inputs)
 {
 	t_token	*head;
 	t_token	*current;
@@ -37,17 +37,18 @@ t_token	*lexer(t_minishell *shell, char *input)
 
 	head = NULL;
 	current = NULL;
-	while (*input)
+	while (*inputs)
 	{
-		new_token = get_next_token(shell, &input);
+		new_token = get_next_token(shell, &inputs);
 		if (!new_token)
 		{
-			if (!*input)
+			if (!*inputs)
 				break ;
 			if (shell->last_exit == 0)
 			{
 				shell->last_exit = 2;
-				ft_putendl_fd("minishell: syntax error near unexpected token", 2);
+				ft_putendl_fd("minishell: syntax"
+					"error near unexpected token", 2);
 			}
 			free_tokens(head);
 			return (NULL);
@@ -56,4 +57,3 @@ t_token	*lexer(t_minishell *shell, char *input)
 	}
 	return (head);
 }
-

@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/26 17:53:37 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 10:38:29 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 17:45:39 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-volatile	sig_atomic_t g_exit = 0;
+volatile sig_atomic_t	g_exit = 0;
 
 void	reset_prompt(int sig)
 {
@@ -44,10 +44,10 @@ void	back_slash(int sig)
 	printf("Quit (core dumped)\n");
 }
 
-
 void	child_signal_handler(int sig)
 {
 	int	dev_null_fd;
+
 	if (sig == SIGINT)
 	{
 		dev_null_fd = open("/dev/null", O_RDONLY);
@@ -67,5 +67,3 @@ void	command_handler(int signum)
 		printf("\n");
 	}
 }
-
-
