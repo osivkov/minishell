@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:57:11 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 14:34:24 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 10:35:52 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,19 +32,12 @@ void	free_cmd(t_cmd *cmd)
 		}
 		if (cmd->quote_type)
 		{
-			i = 0;
-			while (cmd->quote_type[i])
-			{
-				free(cmd->quote_type[i]);
-				i++;
-			}
 			free(cmd->quote_type);
 		}
 		cmd = cmd->next;
 		free(tmp);
 	}
 }
-
 
 void	free_tokens(t_token *tokens)
 {
@@ -62,7 +55,6 @@ void	free_tokens(t_token *tokens)
 	}
 }
 
-
 /*
 * free_minishell:
 * - Frees the memory allocated for environment variables.
@@ -75,7 +67,7 @@ void	free_minishell(t_minishell *shell)
 	int	i;
 
 	if (!shell)
-		return;
+		return ;
 	if (shell->env)
 	{
 		i = 0;
@@ -93,21 +85,21 @@ void	free_minishell(t_minishell *shell)
 	free(shell);
 }
 
-
 int	ft_isspace(int c)
 {
-	if (c == ' ' ||
-		c == '\t' ||
-		c == '\n' ||
-		c == '\v' ||
-		c == '\f' ||
-		c == '\f' ||
-		c == '\r')
+	if (c == ' '
+		|| c == '\t'
+		|| c == '\n'
+		|| c == '\v'
+		|| c == '\f'
+		|| c == '\f'
+		|| c == '\r')
 	{
 		return (1);
-	}	
+	}
 	return (0);
 }
+
 int	is_operator_char(char c)
 {
 	return (c == '|' || c == '<' || c == '>');

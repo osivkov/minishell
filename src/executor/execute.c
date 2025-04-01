@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dsewlia <dsewlia@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 08:13:52 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/24 18:48:22 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/31 09:53:44 by dsewlia          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,11 +106,11 @@ void	mini_terminal(t_minishell *mini, int count_cmd)
 	// 	exit (1);
 	// }
 	fd = create_pipes(mini, count_cmd);
-	if (fd != NULL)
-	{
-		initiate_execute(mini, fd, count_cmd);
-		free (fd);
-	}
+	if (fd == NULL)
+		return ;
+	initiate_execute(mini, fd, count_cmd);
+	free (fd);
+
 // 	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_set) == -1)
 // 	{
 // 		perror("tcsettr error");
@@ -125,7 +125,6 @@ will free cmd and args in cmd and then return*/
 void	execute(t_minishell *mini)
 {
 	int		count_cmd;
-
 
 	count_cmd = handle_inout_fd(mini->cmd);
 	if (count_cmd == 0)

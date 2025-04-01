@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dsewlia <dsewlia@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 09:48:08 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/26 12:09:50 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/03/31 10:12:47 by dsewlia          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,10 @@ int	get_final_path(t_minishell *mini, char **all_path, char *path, \
 			ft_free_double(all_path, NULL, NULL, NULL);
 			return (free (full_path), 0);
 		}
+		ft_free_single(full_path, NULL, NULL, NULL);
 	}
 	ft_free_double(all_path, NULL, NULL, NULL);
-	return (free (full_path), ft_error_msg(to_find, NULL, "command not found"), \
-		127);
+	return (ft_error_msg(to_find, NULL, "command not found"), 127);
 }
 
 /*will return 0 if cmd path is found and wil write it into path
@@ -52,7 +52,7 @@ int	get_cmd_path(t_minishell *mini, char *to_find, char *path)
 
 	temp = ft_get_env_var(mini, "PATH");
 	if (temp == NULL)
-		return (ENOMEM);
+		return (ft_malloc_error(mini), ENOMEM);
 	else if (ft_strncmp(temp, "", 1) == 0)
 	{
 		printf("minishell: %s: No such file or directory\n", to_find);

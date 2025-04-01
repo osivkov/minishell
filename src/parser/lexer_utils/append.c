@@ -6,12 +6,15 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 14:52:54 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/25 18:21:28 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 10:32:47 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
 
 static char	*realloc_and_append_char(char *old_str, size_t old_len, char c)
 {
@@ -104,16 +107,20 @@ char	*build_word_value(t_minishell *shell, char **input, int **out_qt)
 	if (**input == '$' && ((*input)[1] == '\'' || (*input)[1] == '\"'))
 	{
 		if (handle_dollar_quote(shell, input, &value, &quote_type) < 0)
+		{
+			free(value);
+			free(quote_type);
+			shell->last_exit = ENOMEM;
 			return (NULL);
+		}
 	}
 	if (process_chars(shell, input, &value, &quote_type) < 0)
 	{
-		free(value);
-		free(quote_type);
-		return (NULL);
+		shell->last_exit = ENOMEM;
+		return (free(value), free(quote_type), NULL);
 	}
 	if (!value)
-		return (NULL);
+		return (free(quote_type), NULL);
 	*out_qt = quote_type;
 	return (value);
 }

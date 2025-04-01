@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 13:42:44 by osivkov           #+#    #+#             */
-/*   Updated: 2025/03/24 15:08:40 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/01 09:31:50 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int	handle_single_quote(t_minishell *shell,
 {
 	int	ret;
 
-	(*input)++;
+	(*input)++;  // Пропускаем открывающую кавычку
 	while (**input && **input != '\'')
 	{
 		ret = append_char(value, qt, **input, 1);
@@ -42,21 +42,21 @@ int	handle_single_quote(t_minishell *shell,
 		{
 			ft_putendl_fd("malloc error", 2);
 			shell->last_exit = 12;
-			return (free(*value), free(*qt), -1);
+			return (-1);
 		}
 		(*input)++;
 	}
 	if (**input != '\'')
 	{
-		ft_putendl_fd("minishell: syntax error: missing"
-			"closing single quote", 2);
+		ft_putendl_fd("minishell: syntax error: missing closing single quote", 2);
 		shell->last_exit = 2;
-		free(*value);
-		return (free(*qt), -1);
+		// НЕ освобождаем *value и *qt здесь – это сделает вызывающая функция
+		return (-1);
 	}
-	(*input)++;
+	(*input)++;  // Пропускаем закрывающую кавычку
 	return (0);
 }
+
 
 // Обрабатывает содержимое двойных кавычек
 int	handle_double_quote(t_minishell *shell,
@@ -64,27 +64,26 @@ int	handle_double_quote(t_minishell *shell,
 {
 	int	ret;
 
-	(*input)++;
+	(*input)++;  // Пропускаем открывающую кавычку
 	while (**input && **input != '\"')
 	{
 		ret = append_char(value, qt, **input, 2);
 		if (ret < 0)
 		{
-			free(*value);
 			ft_putendl_fd("malloc error", 2);
 			shell->last_exit = 12;
-			return (free(*qt), -1);
+			return (-1);
 		}
 		(*input)++;
 	}
 	if (**input != '\"')
 	{
-		ft_putendl_fd("minishell: syntax error:missing"
-			"closing double quote", 2);
+		ft_putendl_fd("minishell: syntax error: missing closing double quote", 2);
 		shell->last_exit = 2;
-		return (free(*value), free(*qt), -1);
+		// НЕ освобождаем *value и *qt здесь – это сделает вызывающая функция
+		return (-1);
 	}
-	(*input)++;
+	(*input)++;  // Пропускаем закрывающую кавычку
 	return (0);
 }
 

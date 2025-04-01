@@ -27,6 +27,7 @@ SRCS = $(SRC_DIR)/main/main.c \
 		$(SRC_DIR)/parser/type/heredoc.c \
 		$(SRC_DIR)/parser/expand_utils/expand_utils.c\
 		$(SRC_DIR)/signals/signals.c \
+		$(SRC_DIR)/signals/utils_signal.c \
 		$(SRC_DIR)/executor/execute.c \
 		$(SRC_DIR)/executor/builtin.c \
 		$(SRC_DIR)/executor/ft_cd_echo_env_pwd.c \
