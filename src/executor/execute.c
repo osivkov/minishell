@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 08:13:52 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/04/02 09:38:33 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 10:29:20 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,13 +61,14 @@ void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
 void	mini_terminal(t_minishell *mini, int count_cmd)
 {
 	int				*fd;
+
 	fd = create_pipes(mini, count_cmd);
 	if (fd == NULL)
 		return ;
 	initiate_execute(mini, fd, count_cmd);
 	free (fd);
-
 }
+
 void	execute(t_minishell *mini)
 {
 	int		count_cmd;

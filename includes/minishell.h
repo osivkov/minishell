@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/02 09:38:30 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 10:37:14 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ typedef struct s_cmd
 }	t_cmd;
 
 extern volatile sig_atomic_t	g_exit;
-
+volatile sig_atomic_t			g_exit = 0;
 typedef struct s_minishell
 {
 	char	**env;
@@ -104,6 +104,16 @@ typedef struct s_heredoc_context
 	int		temp_fd;
 	void	(*old_handler)(int);
 }				t_heredoc_context;
+
+int			run_minishell(t_minishell *shell);
+int			process_line(t_minishell *shell, char *input);
+char		*get_input(t_minishell *shell);
+char		*generate_prompt(t_minishell *shell);
+int			process_command(t_minishell *shell, char *command);
+t_minishell	*init_minishell(char **env);
+char		**dup_env(char **env);
+int			count_env(char **env);
+void		update_shlvlv(t_minishell *shell);
 t_token		*lexer(t_minishell *shell, char *inputs);
 t_token		*create_double_operator_token(char **input);
 t_token		*create_single_operator_token(char **input);

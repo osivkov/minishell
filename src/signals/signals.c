@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/26 17:53:37 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 17:45:39 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 10:36:22 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
-
-volatile sig_atomic_t	g_exit = 0;
 
 void	reset_prompt(int sig)
 {

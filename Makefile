@@ -16,6 +16,8 @@ LIBFT = $(LIBFT_DIR)/libft.a
 
 # List of project source files
 SRCS = $(SRC_DIR)/main/main.c \
+		$(SRC_DIR)/main/run_minishell.c \
+		$(SRC_DIR)/main/init_minishell.c \
 		$(SRC_DIR)/utils/utils.c \
 		$(SRC_DIR)/utils/utils_extra.c \
 		$(SRC_DIR)/parser/lexer.c \

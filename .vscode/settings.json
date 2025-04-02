@@ -4,6 +4,7 @@
 		"minishell.h": "c",
 		"numbers": "c",
 		"errno.h": "c",
-		"libft.h": "c"
+		"libft.h": "c",
+		"readline.h": "c"
 	}
 }
