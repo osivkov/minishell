@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/26 17:53:37 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/02 10:36:22 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 10:55:25 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
+
+volatile sig_atomic_t			g_exit = 0;
 
 void	reset_prompt(int sig)
 {
@@ -51,7 +53,6 @@ void	child_signal_handler(int sig)
 		dev_null_fd = open("/dev/null", O_RDONLY);
 		dup2(dev_null_fd, STDIN_FILENO);
 		close(dev_null_fd);
-		printf("\n");
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		g_exit = 130;

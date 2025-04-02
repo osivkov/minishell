@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 10:19:21 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/02 10:28:08 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 15:21:53 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int	process_command(t_minishell *shell, char *command)
 	if (shell->cmd == NULL)
 	{
 		shell->last_exit = 2;
-		printf("shell-cmd is NULL\n");
+		ft_putstr_fd("shell-cmd is NULL\n", 2);
 		free_tokens(tokens);
 		return (1);
 	}

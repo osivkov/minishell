@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:38:15 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/02 10:37:14 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 15:37:22 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@
 #  define EXIT_MODE		3
 #  define HEREDOC		4
 #  define HEREDOC_PAUSE	5
+
+extern volatile sig_atomic_t	g_exit;
 
 # endif
 
@@ -78,8 +80,6 @@ typedef struct s_cmd
 	struct s_cmd	*next;
 }	t_cmd;
 
-extern volatile sig_atomic_t	g_exit;
-volatile sig_atomic_t			g_exit = 0;
 typedef struct s_minishell
 {
 	char	**env;
@@ -105,6 +105,12 @@ typedef struct s_heredoc_context
 	void	(*old_handler)(int);
 }				t_heredoc_context;
 
+int			handle_heredoc(char *delimiter);
+int			heredoc_parent(t_heredoc_context *ctx, pid_t pid);
+void		heredoc_child(t_heredoc_context *ctx, char *delimiter);
+void		cleanup_heredoc_error(t_heredoc_context *ctx);
+int			process_heredoc_lines(t_heredoc_context *ctx, char *delimiter);
+int			finalize_heredoc(t_heredoc_context *ctx);
 int			run_minishell(t_minishell *shell);
 int			process_line(t_minishell *shell, char *input);
 char		*get_input(t_minishell *shell);
@@ -173,6 +179,7 @@ t_minishell	*init_minishell(char **env);
 int			run_minishell(t_minishell *shell);
 void		free_minishell(t_minishell *shell);
 void		free_cmd(t_cmd *cmd);
+int			ft_strcmp(const char *s1, const char *s2);
 void		free_tokens(t_token *tokens);
 void		free_args_on_error(char **args, int used);
 void		free_quote_types(int **qtypes, int count);
@@ -206,7 +213,7 @@ int			get_cmd_path(t_minishell *mini, char *to_find, char *path);
 int			ft_sys_builtin(t_minishell *mini, t_cmd *head);
 int			begin_builtin(t_minishell *mini, t_cmd *head);
 int			check_builtin(t_cmd *head);
-void		ft_kill_child(t_minishell *mini, int count_cmd);
+void		ft_kill_child(t_minishell *mini, int count_cmd, pid_t	last_pid);
 void		ft_handle_infile(int *fd, t_cmd *head, int i);
 void		ft_handle_outfile(int *fd, t_cmd *head, int i);
 void		ft_init_child(t_minishell *mini, int *fd, t_cmd *head, int i);

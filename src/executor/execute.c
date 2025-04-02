@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 08:13:52 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/04/02 10:29:20 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 16:15:01 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,31 +31,46 @@ int	handle_inout_fd(t_cmd *head)
 	return (count_cmd);
 }
 
-void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
+static void	execute_commands(t_minishell *mini,
+		int *fd, int count_cmd, pid_t *last_pid)
 {
-	t_cmd			*head;
-	pid_t			pid;
-	int				i;
+	t_cmd	*head;
+	int		i;
+	pid_t	pid;
 
+	(void)count_cmd;
 	head = mini->cmd;
 	i = 0;
-	while (head != NULL)
+	while (head)
 	{
 		pid = fork();
 		if (pid == -1)
 		{
-			perror("pipe");
-			exit (1);
+			perror("fork");
+			exit(1);
 		}
 		if (pid == 0)
 			ft_init_child(mini, fd, head, i);
-		i = i + 2;
+		if (!head->next)
+			*last_pid = pid;
+		i += 2;
 		head = head->next;
 	}
-	i = -1;
-	while (++i < (2 * count_cmd))
-		close (fd[i]);
-	ft_kill_child(mini, count_cmd);
+}
+
+void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
+{
+	pid_t	last_pid;
+	int		i;
+
+	execute_commands(mini, fd, count_cmd, &last_pid);
+	i = 0;
+	while (i < 2 * count_cmd)
+	{
+		close(fd[i]);
+		i++;
+	}
+	ft_kill_child(mini, count_cmd, last_pid);
 }
 
 void	mini_terminal(t_minishell *mini, int count_cmd)

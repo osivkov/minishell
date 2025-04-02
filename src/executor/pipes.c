@@ -6,14 +6,14 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 09:50:06 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/04/01 11:03:23 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 15:37:02 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 //waits for child process and updates last exit in t_minishell
-void	ft_kill_child(t_minishell *mini, int count_cmd)
+void	ft_kill_child(t_minishell *mini, int count_cmd, pid_t	last_pid)
 {
 	int		i;
 	pid_t	child_pid;
@@ -28,10 +28,13 @@ void	ft_kill_child(t_minishell *mini, int count_cmd)
 			perror("wait");
 			break ;
 		}
-		if (WIFEXITED(status))
-			mini->last_exit = WEXITSTATUS(status);
-		else if (WIFSIGNALED(status))
-			mini->last_exit = 128 + WTERMSIG(status);
+		if (child_pid == last_pid)
+		{
+			if (WIFEXITED(status))
+				mini->last_exit = WEXITSTATUS(status);
+			else if (WIFSIGNALED(status))
+				mini->last_exit = 128 + WTERMSIG(status);
+		}
 		if (mini->last_exit == 131)
 			printf("Quit (core dumped)\n");
 		i++;

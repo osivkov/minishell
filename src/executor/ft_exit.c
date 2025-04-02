@@ -6,11 +6,12 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 09:48:28 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/04/02 10:28:46 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 16:24:39 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <unistd.h>
 
 static int	ft_check_exit_error(t_minishell *mini, t_cmd *head)
 {
@@ -46,9 +47,10 @@ int	ft_exit(t_minishell *mini, t_cmd *head)
 	exit_status = mini->last_exit;
 	if (head->args[1] == NULL || head->args[1][0] == '\0')
 	{
-		printf("exit\n");
+		if (isatty(STDIN_FILENO))
+			printf("exit\n");
 		free_minishell(mini);
-		exit (exit_status);
+		exit(exit_status);
 	}
 	exit_status = ft_check_exit_error(mini, head);
 	if (exit_status == 1)
@@ -60,7 +62,8 @@ int	ft_exit(t_minishell *mini, t_cmd *head)
 			exit_status += 256;
 		exit_status = exit_status % 256;
 		mini->last_exit = exit_status;
-		printf("exit\n");
+		if (isatty(STDIN_FILENO))
+			printf("exit\n");
 	}
 	free_minishell(mini);
 	exit(exit_status);
