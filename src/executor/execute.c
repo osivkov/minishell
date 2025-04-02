@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dsewlia <dsewlia@student.42.fr>            +#+  +:+       +#+        */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 08:13:52 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/31 09:53:44 by dsewlia          ###   ########.fr       */
+/*   Updated: 2025/04/02 09:12:54 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ int	handle_inout_fd(t_cmd *head)
 	return (count_cmd);
 }
 
-//begins execution.
 void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
 {
 	t_cmd			*head;
@@ -61,62 +60,28 @@ void	initiate_execute(t_minishell *mini, int *fd, int count_cmd)
 	ft_kill_child(mini, count_cmd);
 }
 
-/*execute.c*/
-/*will begin single buitin command. will check if there are infile
-and outfile that is to be duplicated and then initiates the command
-will return the exit status of the command*/
-// int	begin_builtin_single(t_minishell *mini, t_cmd *head, int dup_flag)
-// {
-// 	int		fd[2];
-
-// 	if (head->outfile != STDOUT_FILENO || head->infile != STDIN_FILENO)
-// 		dup_flag = 1;
-// 	if (dup_flag == 1)
-// 	{
-// 		if (pipe(fd) < 0)
-// 		{
-// 			mini->last_exit = errno;
-// 			return (perror("pipe"), mini->last_exit);
-// 		}
-// 		if (head->infile != 0 && dup2(head->infile, STDIN_FILENO) == -1)
-// 			return (perror("dup2 (file-in)"), errno);
-// 		if (head->outfile != 1 && dup2(head->outfile, STDOUT_FILENO) == -1)
-// 			return (perror("dup2 (file-out)"), errno);
-// 		close (fd[0]);
-// 		close (fd[1]);
-// 	}
-// 	mini->last_exit = begin_builtin(mini, head);
-// 	if (dup_flag == 1)
-// 	{
-// 		close (fd[0]);
-// 		close (fd[1]);
-// 	}
-// 	return (mini->last_exit);
-// }
-
 void	mini_terminal(t_minishell *mini, int count_cmd)
 {
 	int				*fd;
-	// struct termios	term_set;
+	struct termios	term_set;
 
-	// if (tcgetattr(STDIN_FILENO, &term_set) == -1)
-	// {
-	// 	perror("tcgetattr error");
-	// 	free_minishell(mini);
-	// 	exit (1);
-	// }
+	if (tcgetattr(STDIN_FILENO, &term_set) == -1)
+	{
+		perror("tcgetattr error");
+		free_minishell(mini);
+		exit (1);
+	}
 	fd = create_pipes(mini, count_cmd);
 	if (fd == NULL)
 		return ;
 	initiate_execute(mini, fd, count_cmd);
 	free (fd);
-
-// 	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_set) == -1)
-// 	{
-// 		perror("tcsettr error");
-// 		free_minishell(mini);
-// 		exit (1);
-// 	}
+	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_set) == -1)
+	{
+		perror("tcsettr error");
+		free_minishell(mini);
+		exit (1);
+	}
 }
 
 /*execute.c*/

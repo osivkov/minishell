@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exit.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dsewlia <dsewlia@student.42.fr>            +#+  +:+       +#+        */
+/*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/24 09:48:28 by dsewlia           #+#    #+#             */
-/*   Updated: 2025/03/31 11:25:26 by dsewlia          ###   ########.fr       */
+/*   Updated: 2025/04/02 09:13:04 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ static int	ft_check_exit_error(t_minishell *mini, t_cmd *head)
 	}
 	return (0);
 }
-
 
 /*will free all allocated memory, print exit on terminal and exits
 if there is more than one argument, will display error and return 1*/
