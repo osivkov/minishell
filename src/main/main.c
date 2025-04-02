@@ -6,7 +6,7 @@
 /*   By: osivkov <osivkov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 15:54:22 by osivkov           #+#    #+#             */
-/*   Updated: 2025/04/01 17:48:17 by osivkov          ###   ########.fr       */
+/*   Updated: 2025/04/02 09:34:52 by osivkov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,55 +48,64 @@ char	*generate_prompt(t_minishell *shell)
 	return (prompt);
 }
 
+static char	*get_input(t_minishell *shell)
+{
+	char	*input;
+	char	*prompt;
+
+	write(STDOUT_FILENO, "\r\033[K", 4);
+	prompt = generate_prompt(shell);
+	input = readline(prompt);
+	free(prompt);
+	if (!input)
+	{
+		ft_putstr_fd("exit\n", 1);
+		return (NULL);
+	}
+	if (input[0] != '\0')
+		add_history(input);
+	return (input);
+}
+
+static int	process_line(t_minishell *shell, char *input)
+{
+	t_token	*tokens;
+	t_cmd	*cmd;
+
+	if (g_exit != 0)
+	{
+		shell->last_exit = g_exit;
+		g_exit = 0;
+	}
+	tokens = lexer(shell, input);
+	if (!tokens && shell->last_exit != 0)
+		return (free(input), 1);
+	cmd = parser(shell, tokens);
+	if (!cmd && shell->last_exit != 0)
+		return (free(input), free_tokens(tokens), 1);
+	expand_command_variables(shell, cmd);
+	shell->cmd = cmd;
+	set_signal(STOP_RESTORE, shell);
+	execute(shell);
+	free_tokens(tokens);
+	shell->tokens = NULL;
+	free_cmd(cmd);
+	shell->cmd = NULL;
+	free(input);
+	return (0);
+}
+
 int	run_minishell(t_minishell *shell)
 {
 	char	*input;
-	t_token	*tokens;
-	t_cmd	*cmd;
-	char	*prompt;
 
 	while (1)
 	{
-		write(STDOUT_FILENO, "\r\033[K", 4);
-		prompt = generate_prompt(shell);
-		input = readline(prompt);
-		free(prompt);
+		input = get_input(shell);
 		if (!input)
-		{
-			ft_putstr_fd("exit\n", 1);
 			break;
-		}
-		if (input[0] != '\0')
-			add_history(input);
-		if (g_exit != 0)
-		{
-			shell->last_exit = g_exit;
-			g_exit = 0;
-		}
-		tokens = lexer(shell, input);
-		if (!tokens && shell->last_exit != 0)
-		{
-			free(input);
-			continue; 
-		}
-		cmd = parser(shell, tokens);
-		if (!cmd && shell->last_exit != 0)
-		{
-			free_tokens(tokens);
-			free(input);
+		if (process_line(shell, input))
 			continue;
-		}
-		expand_command_variables(shell, cmd);
-		shell->cmd = cmd;
-		set_signal(STOP_RESTORE, shell);
-		execute(shell); 
-		free_tokens(tokens);
-		tokens = NULL;
-		shell->tokens = NULL;
-		free_cmd(cmd);
-		cmd = NULL;
-		shell->cmd = NULL;
-		free(input);
 	}
 	return (0);
 }
